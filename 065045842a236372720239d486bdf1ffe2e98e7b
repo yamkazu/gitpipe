@@ -1,0 +1,5 @@
+Install the plugin.
+
+```
+grails install-plugin spring-security-core
+```
