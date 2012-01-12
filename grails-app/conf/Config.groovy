@@ -96,3 +96,7 @@ log4j = {
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.gitpipe.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.gitpipe.UserRole'
 grails.plugins.springsecurity.authority.className = 'org.gitpipe.Role'
+
+// gitpipe configuration
+gitpipe.config.dir="${userHome}/.gitpipe"
+gitpipe.repositories.dir="${gitpipe.config.dir}/repositories"
