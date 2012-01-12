@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/gitpipe.iml" filepath="$PROJECT_DIR$/gitpipe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gitpipe-grailsPlugins.iml" filepath="$PROJECT_DIR$/gitpipe-grailsPlugins.iml" />
     </modules>
   </component>
 </project>
