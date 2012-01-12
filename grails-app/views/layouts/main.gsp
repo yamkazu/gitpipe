@@ -64,9 +64,13 @@
         <div class="container">
           <a class="brand" href="#">gitpipe</a>
           <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#">Feedback/Issues</a></li>
-            <li><a href="#">Contact</a></li>
+            <sec:ifLoggedIn>
+              <li><a href="${request.contextPath}/<sec:username/>"><sec:username/></a></li>
+              <li><g:link controller="logout"><g:message code="logout.label"/></g:link></li>
+            </sec:ifLoggedIn>
+            <sec:ifNotLoggedIn>
+              <li><g:link controller='login' action='auth'><g:message code="login.label"/></g:link></li>
+            </sec:ifNotLoggedIn>
           </ul>
         </div>
       </div>
