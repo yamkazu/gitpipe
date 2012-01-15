@@ -6,6 +6,7 @@ import org.gitpipe.UserRole
 class SignupController {
 
     def form = {
+        render view: 'form'
     }
 
     def create = { SignupCommand command ->
@@ -28,6 +29,7 @@ class SignupController {
     }
 
     def created = {
+        render view: 'created'
     }
 
 }
@@ -43,6 +45,6 @@ class SignupCommand {
         password blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_!?]+", validator: { password, user ->
             password == user.passwordConfirmation ?: ['notmutch']
         }
-        email email: true, blank: false
+        email blank: false, email: true
     }
 }
