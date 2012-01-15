@@ -87,7 +87,27 @@ ul#icons span.ui-icon {
 	width: 500px;
 }
 
-.alert-message p{
+.alert-message p {
 	line-height:18px;
 	margin-bottom:18px;
+}
+
+dl.form {
+    margin-bottom: 10px;
+}
+dl.form dt {
+    font-size: 16px;
+    line-height: 26px;
+    margin-left: 9px;
+}
+.field-actions {
+    margin-left: 9px;
+}
+
+input[type="text"], input[type="password"], .ui-autocomplete-input, textarea, .uneditable-input {
+    width: 300px;
+}
+
+.errors {
+    color: red;
 }

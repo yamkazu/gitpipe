@@ -79,7 +79,8 @@ log4j = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
 
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+    //error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+    debug  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
            'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
@@ -97,6 +98,9 @@ grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.gitpipe.User
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.gitpipe.UserRole'
 grails.plugins.springsecurity.authority.className = 'org.gitpipe.Role'
 
-// gitpipe configuration
+// H2 console Configuration:
+grails.dbconsole.urlRoot = '/db/h2/console'
+
+// gitpipe Configuration:
 gitpipe.config.dir="${userHome}/.gitpipe"
 gitpipe.repositories.dir="${gitpipe.config.dir}/repositories"
