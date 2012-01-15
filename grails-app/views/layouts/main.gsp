@@ -54,6 +54,7 @@
         float: right;
       }
     </style>
+    <r:require module="jquery"/>
     <g:layoutHead/>
     <r:layoutResources />
   </head>
@@ -62,7 +63,7 @@
     <div class="topbar">
       <div class="fill">
         <div class="container">
-          <a class="brand" href="#">gitpipe</a>
+          <a class="brand" href="${request.contextPath}">gitpipe</a>
           <ul class="nav">
             <sec:ifLoggedIn>
               <li><a href="${request.contextPath}/<sec:username/>"><sec:username/></a></li>
@@ -86,6 +87,7 @@
     </div> <!-- /container -->
 
     <!--scripts-->
+    %{--<g:javascript library="jQuery" />--}%
     <g:javascript src="jquery-ui-1.8.16.custom.min.js"/>
 
     <!--daterangepicker-->

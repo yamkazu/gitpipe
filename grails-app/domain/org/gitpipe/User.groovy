@@ -2,39 +2,54 @@ package org.gitpipe
 
 class User {
 
-	transient springSecurityService
+    transient springSecurityService
 
-	String username
-	String password
-	boolean enabled
-	boolean accountExpired
-	boolean accountLocked
-	boolean passwordExpired
+    String username
+    String password
+    String email
+//    String passwordConfirmation
+    boolean enabled
+    boolean accountExpired
+    boolean accountLocked
+    boolean passwordExpired
 
-	static constraints = {
-		username blank: false, unique: true
-		password blank: false
-	}
+    static constraints = {
+        username unique: true
+    }
+//        username blank: false, size: 3..20, unique: true
+//        FIXME なぜかvalidatorを使用すると変なことになる
+//        http://jira.grails.org/browse/GRAILS-7814
+//        password(blank: false, validator: { password , user ->
+//            password == user.passwordConfirmation
+//        })
+//        password blank: false, size: 3..20
+//        email email: true, blank: false
+//    }
 
-	static mapping = {
-		password column: '`password`'
-	}
+    static mapping = {
+        password column: '`password`'
+    }
 
-	Set<Role> getAuthorities() {
-		UserRole.findAllByUser(this).collect { it.role } as Set
-	}
+//    static transients = ['passwordConfirmation']
 
-	def beforeInsert() {
-		encodePassword()
-	}
+    Set<Role> getAuthorities() {
+        UserRole.findAllByUser(this).collect { it.role } as Set
+    }
 
-	def beforeUpdate() {
-		if (isDirty('password')) {
-			encodePassword()
-		}
-	}
+    def beforeInsert() {
+        encodePassword()
+    }
 
-	protected void encodePassword() {
-		password = springSecurityService.encodePassword(password)
-	}
+    def beforeUpdate() {
+        if (isDirty('password')) {
+            encodePassword()
+        }
+    }
+
+    protected void encodePassword() {
+        if (springSecurityService) {
+            password = springSecurityService.encodePassword(password)
+        }
+    }
+
 }
