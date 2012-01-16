@@ -15,7 +15,7 @@ class SignupController {
             return
         }
 
-        def user = new User(username: command.username, password: command.password, email: command.email, enabled: true)
+        def user = new User(username: command.username, password: command.password, email: command.email, enabled: true, createDate: new Date())
 
         if (!user.save(flush: true)) {
             render view: 'form', model: [user: user]

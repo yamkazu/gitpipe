@@ -29,7 +29,11 @@ class BootStrap {
     // FIXME this is debug code
     def initDefaultUser() {
         def userRole = new Role(authority: 'ROLE_USER').save(flush: true)
-        def testUser = new User(username: 'test', enabled: true, password: 'test', email: 'test@example.com')
+        def testUser = new User(username: 'test', enabled: true, password: 'test', email: 'test@example.com', createDate: new Date())
+        
+        testUser.name = 'Test User'
+        testUser.company = 'Test Company'
+        testUser.location = 'Tokyo, Japan'
         testUser.save(flush: true)
         UserRole.create testUser, userRole, true
 
