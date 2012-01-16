@@ -147,3 +147,13 @@ input[type="text"], input[type="password"], .ui-autocomplete-input, textarea, .u
 .separator {
     clear: both;
 }
+
+.form-message {
+    margin-top: 15px;
+    margin-left: 9px;
+    font-weight: bold;
+}
+
+.success-message {
+    color: #57A957;
+}
