@@ -10,7 +10,7 @@
     <h1 class="username">${user.username}&nbsp;<span class="notice">(${user.name})</span></h1>
     <g:if test="${sec.username() == user.username}">
         <div class="profile_actions">
-            <span>This is you! <a href="#" class="button">Edit Profile</a></span>
+            <span>This is you! <g:link controller="account" class="button">Edit Profile</g:link></span>
         </div>
     </g:if>
 </div>
