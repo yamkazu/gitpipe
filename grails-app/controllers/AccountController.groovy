@@ -36,9 +36,32 @@ class AccountController {
         user.location = command.location
         user.save()
 
-//        flash.message = "User not found for id ${params.id}"
         flash.message = message(code: "account.update.successful")
         redirect controller: 'account'
+    }
+
+    def showAdmin = {
+    }
+
+    def updatePassword = { PasswordUpdateCommand command ->
+        if (command.hasErrors()) {
+            render view: 'showAdmin', model: [user: command]
+            return
+        }
+
+        def user = User.findByUsername springSecurityService.principal.username
+
+        if (!user) {
+            response.sendError(404)
+            return
+        }
+
+        user.password = command.password
+        user.save()
+
+        flash.passwordMessage = message(code: "password.update.successful")
+
+        redirect controller: 'account', action: 'admin'
     }
 
 }
@@ -54,3 +77,15 @@ class AccountUpdateCommand {
         location maxSize: 20
     }
 }
+
+@Validateable
+class PasswordUpdateCommand {
+    String password
+    String passwordConfirmation
+    static constraints = {
+        password blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_!?]+", validator: { password, user ->
+            password == user.passwordConfirmation ?: ['notmutch']
+        }
+    }
+}
+

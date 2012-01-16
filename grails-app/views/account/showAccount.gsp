@@ -7,14 +7,19 @@
 <body>
 <h1>Account Settings</h1>
 
-<div id="tabs">
-    <ul>
-        <li><a href="#">Public Profile</a></li>
-        <li><a href="#admin">Account Admin</a></li>
-        <li><a href="#ssh">SSH Public Keys</a></li>
+<div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+    <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+        <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active">
+            <g:link controller="account">Account Admin</g:link>
+        </li>
+        <li class="ui-state-default ui-corner-top">
+            <g:link controller="account" action="admin">Account Admin</g:link>
+        </li>
+        <li class="ui-state-default ui-corner-top">
+            <g:link controller="account" action="ssh">SSH Public Keys</g:link>
+        </li>
     </ul>
 </div>
-
 
 <div id="profile">
     <g:if test="${flash.message}">
@@ -65,7 +70,6 @@
 
 <g:javascript>
     (function ($) {
-        $('#tabs').tabs();
         $('#update-button').button();
     })(jQuery);
 </g:javascript>

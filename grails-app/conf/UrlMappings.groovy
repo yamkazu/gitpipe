@@ -12,7 +12,13 @@ class UrlMappings {
         "/logout/$action?"(controller: "logout")
 
         // account
-        "/account" (controller: "account") {
+        "/account/admin/password"(controller: "account") {
+            action = "updatePassword"
+        }
+        "/account/admin"(controller: "account") {
+            action = [GET: "showAdmin"]
+        }
+        "/account"(controller: "account") {
             action = [GET: "showAccount", POST: "updateAccount"]
         }
 
