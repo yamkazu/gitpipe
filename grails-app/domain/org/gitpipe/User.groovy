@@ -29,6 +29,8 @@ class User {
         password column: '`password`'
     }
 
+    static hasMany = [repositories: RepositoryInfo]
+
     Set<Role> getAuthorities() {
         UserRole.findAllByUser(this).collect { it.role } as Set
     }

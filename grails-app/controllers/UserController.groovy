@@ -11,7 +11,7 @@ class UserController {
             return
         }
 
-        render view: 'show', model: [user: user]
+        render view: 'show', model: [user: user, repositories: user.repositories]
     }
 
 }

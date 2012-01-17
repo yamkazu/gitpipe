@@ -1,7 +1,7 @@
 class UrlMappings {
 
 	static mappings = {
-        // singup
+        // sing up
         "/signup/created"(controller: "signup", action: "created")
         "/signup"(controller: "signup") {
             action = [GET: "form", POST: "create"]
@@ -21,6 +21,12 @@ class UrlMappings {
         "/account"(controller: "account") {
             action = [GET: "showAccount", POST: "updateAccount"]
         }
+
+        // repository
+        "/repository"(controller: "repository") {
+            action = [GET: "form", POST: "create"]
+        }
+        "/$username/$project"(controller: "repository", action: "show")
 
         // user
         "/$username"(controller: "user", action: "show")
