@@ -44,9 +44,28 @@
 
 <div class="row">
     <div class="span10">
-        <h2>Repositories</h2>
+        <div>
+            <h2 class="">Repositories</h2>
 
-        <p>xxx</p>
+            <g:if test="${sec.username() == user.username}">
+                <div>
+                    <g:link controller="repository" class="button">New Repository</g:link>
+                </div>
+            </g:if>
+        </div>
+
+        <g:each in="${repositories}" var="repository">
+            <div class="repository-box">
+                <div class="repository-header">
+                    <a href="${request.contextPath}/${user.username}/${repository.projectName}">${repository.projectName}</a>
+                </div>
+
+                <div class="repository-body">
+                    <span>${repository.description}</span>
+                </div>
+            </div>
+        </g:each>
+
     </div>
 
     <div class="span4">
