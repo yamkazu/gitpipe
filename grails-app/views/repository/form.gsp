@@ -8,42 +8,42 @@
 <body>
 <h1>Create a New Repository</h1>
 
-<div>
-    <g:form controller="repository">
-        <div class="fields-set">
-            <div class="fields">
-                <dl class="form">
-                    <dt><label for="projectName">Project Name</label></dt>
-                    <dd>
+<div class="row show-grid">
+    <div class="span16">
+        <g:form controller="repository">
+            <fieldset>
+                <div class="clearfix ${hasErrors(bean: repositoryInfo, field: 'projectName', 'error')}">
+                    <label for="projectName">Project Name</label>
+
+                    <div class="input">
                         <g:textField name="projectName" size="30"
                                      value="${fieldValue(bean: repositoryInfo, field: 'projectName')}"/>
                         <g:if test="${hasErrors(bean: repositoryInfo, field: 'projectName', 'true')}">
-                            <p class="errors">${fieldError(bean: repositoryInfo, field: 'projectName')}</p>
+                            <span class="help-inline">${fieldError(bean: repositoryInfo, field: 'projectName')}</span>
                         </g:if>
-                    </dd>
-                </dl>
-                <dl class="form">
-                    <dt><label for="description">Description</label></dt>
-                    <dd>
+                    </div>
+                </div>
+
+                <div class="clearfix ${hasErrors(bean: repositoryInfo, field: 'description', 'error')}">
+                    <label for="description">Description</label>
+
+                    <div class="input">
                         <g:textField name="description" size="30"
                                      value="${fieldValue(bean: repositoryInfo, field: 'description')}"/>
                         <g:if test="${hasErrors(bean: repositoryInfo, field: 'description', 'true')}">
-                            <p class="errors">${fieldError(bean: repositoryInfo, field: 'description')}</p>
+                            <span class="help-inline">${fieldError(bean: repositoryInfo, field: 'description')}</span>
                         </g:if>
-                    </dd>
-                </dl>
-            </div>
+                    </div>
+                </div>
 
-            <div class="field-actions">
-                <g:submitButton name="signup_button" value="Create repository" class="ui-button-success"/>
-            </div>
-        </div>
-    </g:form>
+                <div class="clearfix">
+                    <div class="input">
+                        <g:submitButton name="signup_button" value="Create repository" class="btn primary"/>
+                    </div>
+                </div>
+            </fieldset>
+        </g:form>
+    </div>
 </div>
-<g:javascript>
-    (function ($) {
-        $('#signup_button').button();
-    })(jQuery);
-</g:javascript>
 </body>
 </html>

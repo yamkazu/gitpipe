@@ -1,0 +1,26 @@
+body {
+    padding-top: 60px;
+}
+
+.topbar div > ul {
+    float: right;
+}
+
+.repository-box {
+    margin: 20px 0;
+}
+.repository-header {
+    border: 1px solid #EEEEEE;
+    padding: 5px 15px;
+    background-color: #F5F5F5;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 1px 0 #FFFFFF inset;
+    margin-bottom: 0;
+}
+.repository-body {
+    border: 1px solid #EEEEEE;
+    padding: 10px 15px;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 1px 0 #FFFFFF inset;
+    margin-bottom: 0;
+}
