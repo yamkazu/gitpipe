@@ -67,12 +67,12 @@
             </div>
 
             <g:each in="${repositories}" var="repository">
-                <div class="">
-                    <div class="modal-header">
+                <div class="repository-box">
+                    <div class="repository-header">
                         <a href="${request.contextPath}/${user.username}/${repository.projectName}">${repository.projectName}</a>
                     </div>
 
-                    <div class="modal-body">
+                    <div class="repository-body">
                         <span>${repository.description}</span>
                     </div>
                 </div>

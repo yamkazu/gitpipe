@@ -62,7 +62,6 @@
 <r:require module="bootstrap_alerts"/>
 <r:script>
     $(function () {
-//        $(".alert-message");
         $(".alert-message").alert()
     });
 </r:script>
