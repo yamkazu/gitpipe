@@ -26,6 +26,7 @@ class UrlMappings {
         "/repository"(controller: "repository") {
             action = [GET: "form", POST: "create"]
         }
+        "/$username/$project/tree/$ref/$path**"(controller: "repository", action: "tree")
         "/$username/$project"(controller: "repository", action: "show")
 
         // user
