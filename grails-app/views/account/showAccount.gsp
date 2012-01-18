@@ -7,71 +7,81 @@
 <body>
 <h1>Account Settings</h1>
 
-<div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
-    <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
-        <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active">
-            <g:link controller="account">Account Admin</g:link>
-        </li>
-        <li class="ui-state-default ui-corner-top">
-            <g:link controller="account" action="admin">Account Admin</g:link>
-        </li>
-        <li class="ui-state-default ui-corner-top">
-            <g:link controller="account" action="ssh">SSH Public Keys</g:link>
-        </li>
-    </ul>
-</div>
+<ul class="tabs">
+    <li class="active">
+        <g:link controller="account">Account Admin</g:link>
+    </li>
+    <li>
+        <g:link controller="account" action="admin">Account Admin</g:link>
+    </li>
+    <li>
+        <g:link controller="account" action="ssh">SSH Public Keys</g:link>
+    </li>
+</ul>
 
-<div id="profile">
-    <g:if test="${flash.message}">
-        <div class="form-message success-message">
-            <p>${flash.message}</p>
-        </div>
-    </g:if>
-    <g:form controller="account">
-        <div class="fields-set">
-            <div class="fields">
-                <dl class="form">
-                    <dt><label for="name">Name</label></dt>
-                    <dd>
+<g:if test="${flash.message}">
+    <div class="alert-message success">
+        <a class="close" href="#">×</a>
+
+        <p>${flash.message}</p>
+    </div>
+</g:if>
+
+<div class="row show-grid">
+    <div class="span16">
+        <g:form controller="account">
+            <fieldset>
+                <div class="clearfix ${hasErrors(bean: user, field: 'name', 'error')}">
+                    <label for="name">Name</label>
+
+                    <div class="input">
                         <g:textField name="name" size="30"
                                      value="${fieldValue(bean: user, field: 'name')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'name', 'true')}">
-                            <p class="errors">${fieldError(bean: user, field: 'name')}</p>
+                            <span class="help-inline">${fieldError(bean: user, field: 'name')}</span>
                         </g:if>
-                    </dd>
-                </dl>
-                <dl class="form">
-                    <dt><label for="email">Email Address</label></dt>
-                    <dd><g:textField name="email" size="30"
+                    </div>
+                </div>
+
+                <div class="clearfix ${hasErrors(bean: user, field: 'email', 'error')}">
+                    <label for="email">Email Address</label>
+
+                    <div class="input">
+                        <g:textField name="email" size="30"
                                      value="${fieldValue(bean: user, field: 'email')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'email', 'true')}">
-                            <p class="errors">${fieldError(bean: user, field: 'email')}</p>
+                            <span class="help-inline">${fieldError(bean: user, field: 'email')}</span>
                         </g:if>
-                    </dd>
-                </dl>
-                <dl class="form">
-                    <dt><label for="location">Location</label></dt>
-                    <dd><g:textField name="location" size="30"
+                    </div>
+                </div>
+
+                <div class="clearfix ">
+                    <label for="location">Location</label>
+
+                    <div class="input ${hasErrors(bean: user, field: 'location', 'error')}">
+                        <g:textField name="location" size="30"
                                      value="${fieldValue(bean: user, field: 'location')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'location', 'true')}">
-                            <p class="errors">${fieldError(bean: user, field: 'location')}</p>
+                            <span class="help-inline">${fieldError(bean: user, field: 'location')}</span>
                         </g:if>
-                    </dd>
-                </dl>
-            </div>
+                    </div>
+                </div>
 
-            <div class="field-actions">
-                <g:submitButton name="update-button" value="Update information"
-                                class="ui-button-success"/>
-            </div>
-        </div>
-    </g:form>
+                <div class="clearfix">
+                    <div class="input">
+                        <g:submitButton name="update-button" value="Update information"
+                                        class="btn primary"/>
+                    </div>
+                </div>
+            </fieldset>
+        </g:form>
+    </div>
 </div>
-
-<g:javascript>
-    (function ($) {
-        $('#update-button').button();
-    })(jQuery);
-</g:javascript>
+<r:require module="bootstrap_alerts"/>
+<r:script>
+    $(function () {
+        $(".alert-message").alert()
+    });
+</r:script>
 </body>
 </html>

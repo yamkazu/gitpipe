@@ -5,12 +5,13 @@
 </head>
 
 <body>
-<h1>Hello gitpipe</h1>
 
-<div>
+<div class="hero-unit">
+    <h1>Hello gitpipe!</h1>
+    <p></p>
     <sec:ifNotLoggedIn>
         <p>
-            <g:link controller="signup" action="show" class="btn large primary">Sing up Now</g:link>
+            <g:link controller="signup" action="show" class="btn primary large">Sing up Now »</g:link>
         </p>
     </sec:ifNotLoggedIn>
 </div>
