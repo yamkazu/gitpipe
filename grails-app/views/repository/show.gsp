@@ -14,10 +14,12 @@
 
 <div id="tree"></div>
 
-<g:javascript src="git-tree.js" />
+<r:require module="gitpipe_treeviewer" />
 <g:javascript>
     $(function () {
-        $('#tree').gitTree("${request.contextPath}/${user.username}", "master");
+        $('#tree').gitTree("${request.contextPath}/${user.username}/${repository.projectName}/tree", "master", {
+            rootName: "${repository.projectName}"
+        });
     });
 </g:javascript>
 
