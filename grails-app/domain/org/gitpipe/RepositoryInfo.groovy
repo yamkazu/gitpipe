@@ -1,5 +1,6 @@
 package org.gitpipe
 
+import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.lib.RepositoryCache
@@ -34,6 +35,8 @@ class RepositoryInfo {
     def Repository repository;
 
     static transients = ['repository']
+
+    static final ObjectTypes = [(Constants.OBJ_TREE): Constants.TYPE_TREE, (Constants.OBJ_BLOB): Constants.TYPE_BLOB]
 
     def repository() {
         if (!repository) {
@@ -75,7 +78,7 @@ class RepositoryInfo {
             if (!path) {
                 while (treeWalk.next()) {
 //                    files << GitObject.of(treeWalk.getObjectId(0).name, treeWalk.getFileMode(0).objectType, treeWalk.nameString, getLastCommit(repository, treeWalk.pathString, walk.parseCommit(objectId)))
-                    files << [id: treeWalk.getObjectId(0).name, type: treeWalk.getFileMode(0).objectType, name: treeWalk.nameString]
+                    files << [id: treeWalk.getObjectId(0).name, type: ObjectTypes.get(treeWalk.getFileMode(0).objectType) , name: treeWalk.nameString]
                 }
             } else {
                 while (treeWalk.next()) {
@@ -88,7 +91,7 @@ class RepositoryInfo {
                     }
                     if (foundFolder) {
 //                        files << GitObject.of(treeWalk.getObjectId(0).name, treeWalk.getFileMode(0).objectType, treeWalk.nameString, getLastCommit(repository, treeWalk.pathString, walk.parseCommit(objectId)))
-                        files << [id: treeWalk.getObjectId(0).name, type: treeWalk.getFileMode(0).objectType, name: treeWalk.nameString]
+                        files << [id: treeWalk.getObjectId(0).name, type: ObjectTypes.get(treeWalk.getFileMode(0).objectType), name: treeWalk.nameString]
                     }
                 }
             }

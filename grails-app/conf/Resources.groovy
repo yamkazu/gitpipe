@@ -5,6 +5,21 @@ modules = {
         resource url: '/css/gitpipe.css'
     }
 
+    gitpipe_treeviewer {
+        dependsOn 'jquery, ui_effects_slide'
+        resource url: 'js/treeviewer.js'
+    }
+
+    ui_effects_core {
+        dependsOn 'jquery'
+        resource url: 'js/ui/jquery.effects.core.min.js'
+    }
+
+    ui_effects_slide {
+        dependsOn 'jquery, ui_effects_core'
+        resource url: 'js/ui/jquery.effects.slide.min.js'
+    }
+
     bootstrap {
         resource url: '/css/bootstrap.css'
     }

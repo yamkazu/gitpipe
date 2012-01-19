@@ -11,10 +11,6 @@ class SignupController {
 
     def create = { SignupCommand command ->
         if (command.hasErrors()) {
-            println 'e'
-            println errors.allErrors.each {
-                println it
-            }
             render view: 'form', model: [user: command]
             return
         }
@@ -22,10 +18,6 @@ class SignupController {
         def user = new User(username: command.username, password: command.password, email: command.email, enabled: true, createDate: new Date())
 
         if (!user.save(flush: true)) {
-            println 'f'
-            println errors.allErrors.each {
-                println it
-            }
             render view: 'form', model: [user: user]
             return
         }

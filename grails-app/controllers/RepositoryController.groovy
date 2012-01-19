@@ -58,7 +58,7 @@ class RepositoryController {
         render view: 'show', model: [user: user, repository: repositoryInfo]
     }
 
-    def tree = {
+    def tree() {
         def user = User.findByUsername params.username
         if (!user) {
             response.sendError(404)
@@ -77,11 +77,9 @@ class RepositoryController {
         def path = params.path
 
         render(contentType: "text/json") {
-//            files = array {
-//                for (Map values in files) {
-//                    f name: file.name, objectId: file.objectId, type: file.objectType.name(), author: file.commit.authorIdent.name, message: file.commit.shortMessage, date: new Date(file.commit.commitTime * 1000L)
-//                }
-//            }
+            if (path) {
+                parent = new File(path).parent ?: ""
+            }
             files = repositoryInfo.findFilesInPath(ref, path)
         }
     }
