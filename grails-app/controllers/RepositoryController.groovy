@@ -14,11 +14,11 @@ class RepositoryController {
     def springSecurityService
 
     @Secured(['ROLE_USER'])
-    def form = {
+    def form() {
     }
 
     @Secured(['ROLE_USER'])
-    def create = {
+    def create() {
         def user = User.findByUsername springSecurityService.principal.username
 
         if (!user) {
@@ -40,7 +40,7 @@ class RepositoryController {
         redirect(uri: "/${user.username}/${repositoryInfo.projectName}")
     }
 
-    def show = {
+    def show() {
         def user = User.findByUsername params.username
         if (!user) {
             response.sendError(404)

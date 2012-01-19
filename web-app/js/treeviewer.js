@@ -159,8 +159,8 @@
         (function (file, $tr) {
             $('<td>').text(file.type).appendTo($tr);
             $('<td>').text(file.name).appendTo($tr);
-            $('<td>').appendTo($tr);
-            $('<td>').appendTo($tr);
+            $('<td>').text(file.date).appendTo($tr);
+            $('<td>').test('[' + file.commiter + ']' + file.message).appendTo($tr);
             $('<td>').appendTo($tr);
         })(file, $tr);
     }
@@ -175,8 +175,8 @@
                 that.path = newPath;
                 that.renderAsForward();
             })).appendTo($tr);
-            $('<td>').appendTo($tr);
-            $('<td>').appendTo($tr);
+            $('<td>').text(file.date).appendTo($tr);
+            $('<td>').test('[' + file.commiter + ']' + file.message).appendTo($tr);
             $('<td>').appendTo($tr);
         })(file, $tr);
     }
