@@ -17,7 +17,7 @@
 <r:require module="gitpipe_treeviewer" />
 <g:javascript>
     $(function () {
-        $('#tree').gitTree("${request.contextPath}/${user.username}/${repository.projectName}/tree", "master", {
+        $('#tree').gitTree("${request.contextPath}/${user.username}/${repository.projectName}", "master", {
             rootName: "${repository.projectName}"
         });
     });

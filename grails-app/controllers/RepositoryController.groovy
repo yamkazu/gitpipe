@@ -1,6 +1,12 @@
 import grails.plugins.springsecurity.Secured
+import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.revwalk.RevCommit
 import org.gitpipe.RepositoryInfo
 import org.gitpipe.User
+import org.gitpipe.util.TimeUtils
+import org.springframework.web.util.HtmlUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,6 +16,8 @@ import org.gitpipe.User
  * To change this template use File | Settings | File Templates.
  */
 class RepositoryController {
+
+    private static final Log LOG = LogFactory.getLog(RepositoryController.class)
 
     def springSecurityService
 
@@ -35,7 +43,7 @@ class RepositoryController {
 
         // TODO
         // change before insert process
-        repositoryInfo.createRepository()
+        repositoryInfo.repository().create()
 
         redirect(uri: "/${user.username}/${repositoryInfo.projectName}")
     }
@@ -73,14 +81,70 @@ class RepositoryController {
             return
         }
 
-        def ref = params.ref
-        def path = params.path
+        def repository = repositoryInfo.repository()
 
         render(contentType: "text/json") {
-            if (path) {
-                parent = new File(path).parent ?: ""
+            current = params.path;
+            if (params.path) {
+                parent = new File(params.path).parent ?: ""
             }
-            files = repositoryInfo.findFilesInPath(ref, path)
+            files = repository.findFilesInPath(params.ref, params.path).collect {
+                RevCommit commit = repository.getLastCommit(params.ref, it.path)
+
+                def commitInfo = [message: commit.shortMessage, date: TimeUtils.timeAgo(new Date(commit.commitTime * 1000L))]
+
+                if (!commit.authorIdent.emailAddress) {
+                    return it + commitInfo
+                }
+
+                def author = User.findByEmail(commit.authorIdent.emailAddress)
+                if (!author) {
+                    return it + commitInfo
+                }
+                commitInfo['author'] = author.username
+                it + commitInfo
+            }.collect {
+                def type = it.type
+                def url = null
+                if (type == Constants.TYPE_BLOB) {
+                    url = createLink(mapping: 'repository_blob', params: [username: params.username, project: params.project, ref: params.ref, path: it.path]).toString()
+                } else /*if (type == Constants.TYPE_TREE)*/ {
+                    url = createLink(mapping: 'repository_tree', params: [username: params.username, project: params.project, ref: params.ref, path: it.path]).toString()
+                }
+                it + [url: url]
+            }
+        }
+    }
+
+    def blob = {
+        def user = User.findByUsername params.username
+        if (!user) {
+            LOG.error("cannot found user: ${params.username}")
+            response.sendError(404)
+            return
+        }
+
+        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
+            params.project == repositoryInfo.projectName
+        }
+        if (!repositoryInfo) {
+            LOG.error("cannot found projecet: ${params.project}")
+            response.sendError(404)
+            return
+        }
+
+        def content = repositoryInfo.repository().getContent(params.ref, params.path)
+//        if (content == null) {
+//            LOG.error("cannot found content: ${params.ref}/${params.path}")
+//            response.sendError(404)
+//            return
+//        }
+
+        render(contentType: "text/json") {
+            path = params.path
+            mode = content.mode
+            size = content.size
+            data = HtmlUtils.htmlEscape(new String(content.data, Constants.CHARSET))
         }
     }
 
