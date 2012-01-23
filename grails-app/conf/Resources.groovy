@@ -66,7 +66,7 @@ modules = {
 
     syntax_highlighter {
         // style
-        resource url: '/css/sh/shCoreEclipse.css'
+        resource url: '/css/shThemeGitpipe.css'
         // core scripts
         resource url: '/js/sh/XRegExp.js'
         resource url: '/js/sh/shCore.js'
