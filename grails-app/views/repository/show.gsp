@@ -17,8 +17,11 @@
 <r:require module="gitpipe_treeviewer" />
 <g:javascript>
     $(function () {
-        $('#tree').gitTree("${request.contextPath}/${user.username}/${repository.projectName}", "master", {
-            rootName: "${repository.projectName}"
+        $('#tree').gitTree({
+            rootName: "${repository.projectName}",
+            url: "${createLink(mapping: 'project', params: ['username': user.username, 'project': repository.projectName])}",
+            ref: "${ref}",
+            path: "${path}"
         });
     });
 </g:javascript>

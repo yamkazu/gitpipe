@@ -1,6 +1,5 @@
 package org.gitpipe.util
 
-import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.StringUtils
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
@@ -17,6 +16,40 @@ class GitUtil {
     Repository repository;
 
     static final ObjectTypes = [(Constants.OBJ_TREE): Constants.TYPE_TREE, (Constants.OBJ_BLOB): Constants.TYPE_BLOB]
+    
+    static final SUPPORT_CONTENTS = [
+            '.as': 'AS3',
+            '.sh': 'Bash',
+            '.cfm': 'ColdFusion',
+            '.cs': 'CSharp',
+            '.c': 'Cpp',
+            '.cpp': 'Cpp',
+            '.css': 'Css',
+            '.pas': 'Delphi',
+            '.diff': 'Diff',
+            '.patch': 'Diff',
+            '.erl': 'Erlang',
+            '.groovy': 'Groovy',
+            '.js': 'JScript',
+            '.java': 'Java',
+            '.fx': 'JavaFX',
+            '.pl': 'Perl',
+            '.php': 'Php',
+            '.text': 'Plain',
+            '.txt': 'Plain',
+            '.md': 'Plain',
+            'readme': 'Plain',
+            '.ps1': 'PowerShell',
+            '.py': 'Python',
+            '.ruby': 'Ruby',
+            '.scala': 'Scala',
+            '.sql': 'Sql',
+            '.vb': 'Vb',
+            '.xml': 'Xml',
+            '.xslt': 'Xml',
+            '.html': 'Xml',
+            '.xhtml': 'Xml'
+    ]
 
     def GitUtil(File directory) {
         repository = RepositoryCache.open(RepositoryCache.FileKey.exact(directory, FS.DETECTED), false)
@@ -28,10 +61,31 @@ class GitUtil {
         }
     }
 
+    static def isSupportContentType(String path) {
+        getContentType(path) != null
+    }
+
+    static def isNotSupportContentType(String path) {
+        !isSupportContentType(path)
+    }
+
+    static def getContentType(String path) {
+        def name = new File(path).name
+        def type = SUPPORT_CONTENTS.find { k, v ->
+            name.toLowerCase().endsWith(k)
+        }
+        type.value
+    }
+
     def getContent(String ref, String path) {
 //        InputStream stream = null
         RevWalk revWalk = null
         TreeWalk treeWalk = null
+
+        if (isNotSupportContentType(path)) {
+            throw new UnsupportedContentType()
+        }
+        
         def content = [:]
         try {
             ObjectId objectId = repository.resolve(ref)
@@ -53,6 +107,7 @@ class GitUtil {
                 content['mode'] = treeWalk.getFileMode(0).bits
                 content['size'] = objectLoader.size
                 content['data'] = objectLoader.bytes
+                content['file_type'] = getContentType(path)
 //                FIXME big file の扱い
 //                stream = objectLoader.openStream()
 //                IOUtils.toByteArray(stream)
@@ -168,5 +223,7 @@ class GitUtil {
         revWalk.release()
         commits
     }
+
+    static class UnsupportedContentType extends RuntimeException {}
 
 }

@@ -62,7 +62,7 @@
                 <h2 class="">Repositories</h2>
 
                 <g:if test="${sec.username() == user.username}">
-                        <g:link controller="repository" class="btn small">New Repository</g:link>
+                    <g:link controller="repository" class="btn small">New Repository</g:link>
                 </g:if>
             </div>
 
@@ -87,12 +87,6 @@
         </div>
     </div>
 </section>
-
-<g:javascript>
-    (function ($) {
-        $('.button').button();
-    })(jQuery);
-</g:javascript>
 </body>
 
 </html>

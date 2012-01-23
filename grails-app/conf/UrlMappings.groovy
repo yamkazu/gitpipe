@@ -25,7 +25,7 @@ class UrlMappings {
         // repository
         name repository_tree: "/$username/$project/tree/$ref/$path**"(controller: "repository", action: "tree")
         name repository_blob: "/$username/$project/blob/$ref/$path**"(controller: "repository", action: "blob")
-        "/$username/$project"(controller: "repository", action: "show")
+        name project: "/$username/$project"(controller: "repository", action: "show")
         "/repository"(controller: "repository") {
             action = [GET: "form", POST: "create"]
         }
