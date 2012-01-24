@@ -31,7 +31,7 @@ class UrlMappings {
         }
 
         // user
-        "/$username"(controller: "user", action: "show")
+        name user: "/$username"(controller: "user", action: "show")
 
         // other
 		"/"(view: "index")

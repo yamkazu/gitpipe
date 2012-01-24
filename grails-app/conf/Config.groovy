@@ -105,3 +105,36 @@ grails.dbconsole.urlRoot = '/db/h2/console'
 gitpipe.config.dir="${userHome}/.gitpipe"
 gitpipe.repositories.dir="${gitpipe.config.dir}/repositories"
 
+gitpipe.viewer.support = [
+        '.as': 'AS3',
+        '.sh': 'Bash',
+        '.cfm': 'ColdFusion',
+        '.cs': 'CSharp',
+        '.c': 'Cpp',
+        '.cpp': 'Cpp',
+        '.css': 'Css',
+        '.pas': 'Delphi',
+        '.diff': 'Diff',
+        '.patch': 'Diff',
+        '.erl': 'Erlang',
+        '.groovy': 'Groovy',
+        '.js': 'JScript',
+        '.java': 'Java',
+        '.fx': 'JavaFX',
+        '.pl': 'Perl',
+        '.php': 'Php',
+        '.text': 'Plain',
+        '.txt': 'Plain',
+        '.md': 'Plain',
+        'readme': 'Plain',
+        '.ps1': 'PowerShell',
+        '.py': 'Python',
+        '.ruby': 'Ruby',
+        '.scala': 'Scala',
+        '.sql': 'Sql',
+        '.vb': 'Vb',
+        '.xml': 'Xml',
+        '.xslt': 'Xml',
+        '.html': 'Xml',
+        '.xhtml': 'Xml'
+]
