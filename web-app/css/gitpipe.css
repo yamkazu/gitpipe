@@ -37,3 +37,15 @@ body {
     border-left-style: none;
 }
 
+.blob-info {
+    padding: 0 5px 0 0;
+}
+
+.blob-info span {
+    padding: 0 10px;
+}
+
+.blob-info span:nth-child(n+2) {
+    border-left: 1px #DDDDDD solid;
+}
+

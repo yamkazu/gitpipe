@@ -1,12 +1,12 @@
 import grails.plugins.springsecurity.Secured
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gitpipe.RepositoryInfo
 import org.gitpipe.User
 import org.gitpipe.util.TimeUtils
-import org.springframework.web.util.HtmlUtils
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,6 +20,7 @@ class RepositoryController {
     private static final Log LOG = LogFactory.getLog(RepositoryController.class)
 
     def springSecurityService
+    def grailsApplication
 
     @Secured(['ROLE_USER'])
     def form() {
@@ -63,7 +64,9 @@ class RepositoryController {
             return
         }
 
-        render view: 'show', model: [user: user, repository: repositoryInfo, 'ref': 'master', path: '']
+        def repository = repositoryInfo.repository()
+
+        render view: 'showTree', model: [user: user, repository: repositoryInfo, 'ref': repository.defaultBranch, path: '', commit: repository.getLastCommit()]
     }
 
     def tree() {
@@ -84,7 +87,7 @@ class RepositoryController {
 
         withFormat {
             html {
-                render view: 'show', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
+                render view: 'showTree', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
             }
             json {
                 def repository = repositoryInfo.repository()
@@ -140,21 +143,55 @@ class RepositoryController {
             return
         }
 
-        def content = repositoryInfo.repository().getContent(params.ref, params.path)
-//        if (content == null) {
-//            LOG.error("cannot found content: ${params.ref}/${params.path}")
-//            response.sendError(404)
-//            return
-//        }
+        withFormat {
+            html {
+                render view: 'showBlob', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
+            }
+            json {
 
-        render(contentType: "text/json") {
-            path = params.path
-            mode = content.mode
-            size = content.size
-            file_type = content.file_type
-//            data = HtmlUtils.htmlEscape(new String(content.data, Constants.CHARSET))
-            data = new String(content.data, Constants.CHARSET)
+                // FIXME BIG DATA 対応
+                // 取得最大値を設ける
+                def content = repositoryInfo.repository().getContent(params.ref, params.path)
+
+                if (RawText.isBinary(content.data)) {
+                    render(contentType: "text/json") {
+                        path = params.path
+                        mode = content.mode
+                        size = content.size
+                        file_type = 'binary'
+                    }
+                    return
+                }
+
+                render(contentType: "text/json") {
+                    path = params.path
+                    mode = content.mode
+                    size = content.size
+                    file_type = getViewerType(toFileName(path))
+                    data = new String(content.data, Constants.CHARSET)
+                }
+            }
         }
+    }
+
+    private String toFileName(String path) {
+        new File(path).name
+    }
+
+    private boolean isViewerSupport(String name) {
+        getViewerType(name) != null ? true : false
+    }
+
+    private boolean isNotViewerSupport(String name) {
+        return !isViewerSupport(name)
+    }
+
+    private String getViewerType(String name) {
+        def supportTypes = grailsApplication.config.gitpipe.viewer.support
+        def found = supportTypes.find { k, v ->
+            name.toLowerCase().endsWith(k)
+        }
+        found ? found.value : "Plain"
     }
 
 }

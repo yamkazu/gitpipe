@@ -109,15 +109,35 @@
         },
 
         renderBlob:function (data) {
+            this.content.append(this.renderBlobInfo(data));
+
+            if (data.file_type === 'binary') {
+                this.content.append($('<div>').addClass('well').text('no viewer'));
+                this.slideContent("show");
+                this.renderNav(data.path);
+                return;
+            }
+
             var brush = new SyntaxHighlighter.brushes[data.file_type]();
+
             brush.init({toolbar:false});
             var html = brush.getHtml(data.data);
 
             var $code = $(html);
             $('.code div', $code).removeClass('container');
+
             this.content.append($code);
             this.slideContent("show");
             this.renderNav(data.path);
+        },
+
+        renderBlobInfo:function(data) {
+            var $info = $('<div>').addClass('blob-info');
+            $('<span>').text(data.mode).appendTo($info);
+            $('<span>').text(data.size + ' kb').appendTo($info);
+            var $actions = $('<div>').addClass('pull-right').appendTo($info);
+            $actions.append($('<a>').text('raw'));
+            return $info;
         },
 
         hideContentAsBack:function (callback) {
@@ -223,7 +243,10 @@
                     });
                 })).appendTo($tr);
                 $('<td>').text(file.date).appendTo($tr);
-                $('<td>').text(file.message + '[' + file.author + ']').appendTo($tr);
+                var message = $('<td>').text(file.message).appendTo($tr);
+                if (file.author) {
+                    $('<a>').text(' [' + file.author + ']').appendTo(message);
+                }
                 $('<td>').appendTo($tr);
             })(current, file, $tr);
         },
@@ -253,7 +276,15 @@
         var opts = $.extend({}, $.fn.gitTree.defaults, options);
         return this.each(function () {
             var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
-            viewer.getTree(viewer.createTreeLink(opts.path), opts.path === "" ? opts.url : viewer.createTreeLink(opts.path), true);
+            viewer.getTree(viewer.createTreeLink(opts.path), opts.path === "" ? opts.url : viewer.createTreeLink(opts.path));
+        });
+    };
+
+    $.fn.gitBlob = function (options) {
+        var opts = $.extend({}, $.fn.gitTree.defaults, options);
+        return this.each(function () {
+            var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
+            viewer.getBlob(viewer.createBlobLink(opts.path), opts.path === "" ? opts.url : viewer.createBlobLink(opts.path));
         });
     };
 

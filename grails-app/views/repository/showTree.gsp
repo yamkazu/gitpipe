@@ -7,10 +7,17 @@
 <body>
 
 <h1>
-    <a href="${request.contextPath}/${user.username}">${user.username}</a>
+    <a href="${createLink(mapping: 'user', params: [username: user.username])}">${user.username}</a>
     <em>/</em>
-    <a href="${request.contextPath}/${user.username}/${repository.projectName}">${repository.projectName}</a>
+    <a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.projectName])}">${repository.projectName}</a>
 </h1>
+
+<div>
+    <p>${commit.authorIdent.name}</p>
+    <p>${commit.shortMessage}</p>
+    <p>${commit.id.name}</p>
+    <p>${new Date(commit.commitTime * 1000L)}</p>
+</div>
 
 <div id="tree"></div>
 
