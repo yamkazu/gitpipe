@@ -138,3 +138,4 @@ gitpipe.viewer.support = [
         '.html': 'Xml',
         '.xhtml': 'Xml'
 ]
+
