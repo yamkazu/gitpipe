@@ -159,7 +159,7 @@
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
-            $actions.append($('<a>').text('raw'));
+            $actions.append($('<a>').attr('href', this.createRawLink(data.path)).text('raw'));
             return $info;
         },
 
@@ -253,6 +253,10 @@
 
         createBlobLink:function (path) {
             return this.base + "/blob/" + this.ref + "/" + path;
+        },
+
+        createRawLink:function (path) {
+            return this.base + "/raw/" + this.ref + "/" + path;
         },
 
         renderTrAsBlob:function (current, file, $tr) {

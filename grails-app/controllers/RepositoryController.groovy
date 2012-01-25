@@ -175,6 +175,39 @@ class RepositoryController {
         }
     }
 
+    def raw() {
+        def user = User.findByUsername(params.username)
+        if (!user) {
+            LOG.error("cannot found user: ${params.username}")
+            response.sendError(404)
+            return
+        }
+
+        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
+            params.project == repositoryInfo.projectName
+        }
+        if (!repositoryInfo) {
+            LOG.error("cannot found projecet: ${params.project}")
+            response.sendError(404)
+            return
+        }
+
+        def content = repositoryInfo.repository().getContent(params.ref, params.path)
+
+        if (!content.data) {
+            // handle not found
+        }
+
+        response.setContentType(getMimeType(content.data as byte[]))
+        response.setHeader("Content-disposition", "filename=${toFileName(params.path)}")
+        response.outputStream << content.data
+    }
+
+    private String getMimeType(byte[] data) {
+        // TODO 真面目にやるなら拡張子で色々判断しないとな
+        RawText.isBinary(data) ? "application/octet-stream" : "text/plain"
+    }
+
     private String toFileName(String path) {
         new File(path).name
     }
