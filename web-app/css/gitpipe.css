@@ -58,18 +58,36 @@ body {
     border: 1px solid #DDDDDD;
 }
 
-.commit h4 {
+.commit time {
     font-size: 90%;
     background-color: #e6f1f6;
     line-height: 30px;
     padding-left: 10px;
+    display: block;
 }
 
 .commit .meta {
     padding: 5px;
 }
+
 .commit .meta p {
     display: inline;
 }
 
+.commit .meta .message {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.commit .meta .author {
+    font-size: 90%;
+}
+
+.label {
+    text-transform: none;
+}
+
+span.large {
+    font-size: 80%;
+}
 

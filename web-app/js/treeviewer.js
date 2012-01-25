@@ -69,44 +69,67 @@
 
         },
 
-        pushHistory:function (type, url, replaceState) {
-            replaceState = replaceState === undefined ? false : replaceState;
-            if (replaceState) {
-                window.history.replaceState(type, null, url);
-            } else {
+        pushHistory:function (type, url, pushState) {
+            pushState = pushState === undefined ? true : pushState;
+            if (pushState) {
                 window.history.pushState(type, null, url);
+            } else {
+                window.history.replaceState(type, null, url);
             }
         },
 
-        getTree:function (url, pushUrl, replaceState) {
+        getTree:function (url, pushUrl, pushState) {
             pushUrl = pushUrl || url;
             var that = this;
+
+            var cache = that.target.data(pushUrl);
+            if (cache) {
+                that.pushHistory("tree", pushUrl, pushState);
+                that.renderTree(cache);
+                return;
+            }
+
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url:url,
                 success:function (data) {
                     that.target.data(pushUrl, data);
-                    that.pushHistory("tree", pushUrl, replaceState);
+                    if (pushUrl !== url) {
+                        that.target.data(url, data);
+                    }
+                    that.pushHistory("tree", pushUrl, pushState);
                     that.renderTree(data);
                 }
             });
         },
 
-        getBlob:function (url, pushUrl, replaceState) {
+        getBlob:function (url, pushUrl, pushState) {
             pushUrl = pushUrl || url;
             var that = this;
+
+            var cache = that.target.data(pushUrl);
+            if (cache) {
+                that.pushHistory("blob", pushUrl, pushState);
+                that.renderBlob(cache);
+                return;
+            }
+
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url:url,
                 success:function (data) {
                     that.target.data(pushUrl, data);
-                    that.pushHistory("blob", pushUrl, replaceState);
+                    if (pushUrl !== url) {
+                        that.target.data(url, data);
+                    }
+                    that.pushHistory("blob", pushUrl, pushState);
                     that.renderBlob(data);
                 }
             });
         },
+
 
         renderBlob:function (data) {
             this.content.append(this.renderBlobInfo(data));
@@ -131,7 +154,7 @@
             this.renderNav(data.path);
         },
 
-        renderBlobInfo:function(data) {
+        renderBlobInfo:function (data) {
             var $info = $('<div>').addClass('blob-info');
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
@@ -276,7 +299,7 @@
         var opts = $.extend({}, $.fn.gitTree.defaults, options);
         return this.each(function () {
             var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
-            viewer.getTree(viewer.createTreeLink(opts.path), opts.path === "" ? opts.url : viewer.createTreeLink(opts.path));
+            viewer.getTree(viewer.createTreeLink(opts.path), location.pathname, false);
         });
     };
 
@@ -284,7 +307,7 @@
         var opts = $.extend({}, $.fn.gitTree.defaults, options);
         return this.each(function () {
             var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
-            viewer.getBlob(viewer.createBlobLink(opts.path), opts.path === "" ? opts.url : viewer.createBlobLink(opts.path));
+            viewer.getBlob(viewer.createBlobLink(opts.path), location.pathname, false);
         });
     };
 
