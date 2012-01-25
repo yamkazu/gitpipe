@@ -7,7 +7,12 @@ modules = {
 
     gitpipe_treeviewer {
         dependsOn 'jquery, ui_effects_slide, syntax_highlighter'
-        resource url: 'js/treeviewer.js'
+        resource url: 'js/tree.js'
+    }
+
+    gitpipe_commitsviewer {
+        dependsOn 'jquery'
+        resource url: 'js/commits.js'
     }
 
     ui_effects_core {

@@ -66,7 +66,40 @@ class RepositoryController {
 
         def repository = repositoryInfo.repository()
 
-        render view: 'showTree', model: [user: user, repository: repositoryInfo, 'ref': repository.defaultBranch, path: '', commit: repository.getLastCommit()]
+        render view: 'tree', model: [user: user, repository: repositoryInfo, 'ref': repository.defaultBranch, path: '', commit: repository.getLastCommit()]
+    }
+
+    def commits() {
+        def user = User.findByUsername params.username
+        if (!user) {
+            response.sendError(404)
+            return
+        }
+
+        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
+            params.project == repositoryInfo.projectName
+        }
+        if (!repositoryInfo) {
+            response.sendError(404)
+            return
+        }
+
+        def repository = repositoryInfo.repository()
+
+        withFormat {
+            html {
+                render view: 'commits', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path]
+            }
+            json {
+                render(contentType: "text/json") {
+                    commits = array {
+                        for (c in repository.getRevCommit(params.ref, params.path, Integer.decode(params.offset), 20)) {
+                            commit id: c.id.name, shortMessage: c.shortMessage, author: c.authorIdent.name, date: new Date(c.commitTime * 1000L)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     def tree() {
@@ -88,8 +121,7 @@ class RepositoryController {
 
         withFormat {
             html {
-//                render view: 'showTree', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
-                render view: 'showTree', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
+                render view: 'tree', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
             }
             json {
                 render(contentType: "text/json") {
@@ -144,15 +176,17 @@ class RepositoryController {
             return
         }
 
+        def repository = repositoryInfo.repository()
+
         withFormat {
             html {
-                render view: 'showBlob', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
+                render view: 'blob', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
             }
             json {
 
                 // FIXME BIG DATA 対応
                 // 取得最大値を設ける
-                def content = repositoryInfo.repository().getContent(params.ref, params.path)
+                def content = repository.getContent(params.ref, params.path)
 
                 if (RawText.isBinary(content.data)) {
                     render(contentType: "text/json") {
