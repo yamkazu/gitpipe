@@ -3,7 +3,7 @@ import org.springframework.http.HttpStatus
 
 class UserController {
 
-    def show = {
+    def show() {
         def user = User.findByUsername params.username
 
         if (!user) {

@@ -7,7 +7,7 @@ class AccountController {
 
     def springSecurityService
 
-    def showAccount = {
+    def showAccount() {
         def user = User.findByUsername springSecurityService.principal.username
 
         if (!user) {
@@ -18,7 +18,7 @@ class AccountController {
         render view: 'showAccount', model: [user: user]
     }
 
-    def updateAccount = { AccountUpdateCommand command ->
+    def updateAccount(AccountUpdateCommand command) {
         if (command.hasErrors()) {
             render view: 'showAccount', model: [user: command]
             return
@@ -43,7 +43,7 @@ class AccountController {
     def showAdmin = {
     }
 
-    def updatePassword = { PasswordUpdateCommand command ->
+    def updatePassword(PasswordUpdateCommand command) {
         if (command.hasErrors()) {
             render view: 'showAdmin', model: [user: command]
             return

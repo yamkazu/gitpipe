@@ -12,7 +12,7 @@ class UrlMappings {
         "/logout/$action?"(controller: "logout")
 
         // account
-        "/account/admin/password"(controller: "account") {
+        name updatePassword: "/account/admin/password"(controller: "account") {
             action = "updatePassword"
         }
         "/account/admin"(controller: "account") {
@@ -23,8 +23,8 @@ class UrlMappings {
         }
 
         // repository
-        name repository_tree: "/$username/$project/tree/$ref/$path**"(controller: "repository", action: "tree")
-        name repository_blob: "/$username/$project/blob/$ref/$path**"(controller: "repository", action: "blob")
+        name repository_tree: "/$username/$project/tree/$ref/$path**?"(controller: "repository", action: "tree")
+        name repository_blob: "/$username/$project/blob/$ref/$path**?"(controller: "repository", action: "blob")
         name project: "/$username/$project"(controller: "repository", action: "show")
         "/repository"(controller: "repository") {
             action = [GET: "form", POST: "create"]
@@ -34,7 +34,7 @@ class UrlMappings {
         name user: "/$username"(controller: "user", action: "show")
 
         // other
-		"/"(view: "index")
+		name dashboard: "/"(view: "index")
 		"500"(view:'/error')
 	}
 }

@@ -84,13 +84,14 @@ class RepositoryController {
             return
         }
 
+        def repository = repositoryInfo.repository()
 
         withFormat {
             html {
-                render view: 'showTree', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
+//                render view: 'showTree', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path]
+                render view: 'showTree', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
             }
             json {
-                def repository = repositoryInfo.repository()
                 render(contentType: "text/json") {
                     current = params.path;
                     if (params.path) {

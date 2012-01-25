@@ -9,7 +9,7 @@ class SignupController {
         render view: 'form'
     }
 
-    def create = { SignupCommand command ->
+    def create(SignupCommand command) {
         if (command.hasErrors()) {
             render view: 'form', model: [user: command]
             return
@@ -28,7 +28,7 @@ class SignupController {
         redirect action: created
     }
 
-    def created = {
+    def created() {
         render view: 'created'
     }
 

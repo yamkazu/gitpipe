@@ -64,6 +64,14 @@ class GitUtil {
         }
         content
     }
+    
+    Map<String, Ref> getBranches() {
+        repository.refDatabase.getRefs(Constants.R_HEADS)
+    }
+
+    Map<String, Ref> getTags() {
+        repository.refDatabase.getRefs(Constants.R_TAGS)
+    }
 
     List<Map<String, String>> findFilesInPath(String ref, String path) {
         ObjectId objectId = repository.resolve(ref)
@@ -139,7 +147,6 @@ class GitUtil {
     }
 
     boolean hasCommits() {
-        // TODO packがあるとカラではない？
         if (repository != null && repository.getDirectory().exists()) {
             return (new File(repository.getDirectory(), "objects").list().length > 2) || (new File(repository.getDirectory(), "objects/pack").list().length > 0)
         }

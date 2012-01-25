@@ -32,7 +32,7 @@
 
     <div class="row show-grid">
         <div class="span16">
-            <form action="${request.contextPath}/account/admin/password" method="post">
+            <form action="${createLink(mapping: 'updatePassword')}" method="post">
                 <fieldset>
                     <div class="clearfix ${hasErrors(bean: user, field: 'password', 'error')}">
                         <label for="password">Password</label>

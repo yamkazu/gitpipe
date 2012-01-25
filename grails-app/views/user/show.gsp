@@ -69,7 +69,7 @@
             <g:each in="${repositories}" var="repository">
                 <div class="repository-box">
                     <div class="repository-header">
-                        <a href="${request.contextPath}/${user.username}/${repository.projectName}">${repository.projectName}</a>
+                        <a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.projectName])}">${repository.projectName}</a>
                     </div>
 
                     <div class="repository-body">

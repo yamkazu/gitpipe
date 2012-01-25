@@ -112,7 +112,7 @@ gitpipe.viewer.support = [
         '.cs': 'CSharp',
         '.c': 'Cpp',
         '.cpp': 'Cpp',
-        '.css': 'Css',
+        '.css': 'CSS',
         '.pas': 'Delphi',
         '.diff': 'Diff',
         '.patch': 'Diff',

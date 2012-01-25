@@ -30,9 +30,11 @@ body {
 .bordered-table th {
     background-color: #f5f5f5;
 }
+
 .bordered-table td {
     background-color: #F9F9F9;
 }
+
 .bordered-table th + th, .bordered-table td + td, .bordered-table th + td {
     border-left-style: none;
 }
@@ -48,4 +50,26 @@ body {
 .blob-info span:nth-child(n+2) {
     border-left: 1px #DDDDDD solid;
 }
+
+.commit {
+    margin: 0 0 20px 0;
+    border-radius: 4px;
+    /* box-shadow: 0 1px 0 #FFFFFF inset;*/
+    border: 1px solid #DDDDDD;
+}
+
+.commit h4 {
+    font-size: 90%;
+    background-color: #e6f1f6;
+    line-height: 30px;
+    padding-left: 10px;
+}
+
+.commit .meta {
+    padding: 5px;
+}
+.commit .meta p {
+    display: inline;
+}
+
 

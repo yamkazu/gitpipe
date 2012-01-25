@@ -13,10 +13,10 @@
 <div class="topbar">
     <div class="fill">
         <div class="container">
-            <a class="brand" href="${request.contextPath}">gitpipe</a>
+            <a class="brand" href="${createLink(mapping: 'dashboard')}">gitpipe</a>
             <ul class="pull-right">
                 <sec:ifLoggedIn>
-                    <li><a href="${request.contextPath}/<sec:username/>"><sec:username/></a></li>
+                    <li><a href="${createLink(mapping: 'user', params: [username: sec.username()])}">${sec.username()}</a></li>
                     <li><g:link controller="logout"><g:message code="logout.label"/></g:link></li>
                 </sec:ifLoggedIn>
                 <sec:ifNotLoggedIn>
