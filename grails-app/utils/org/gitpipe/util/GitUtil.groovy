@@ -10,6 +10,11 @@ import org.eclipse.jgit.treewalk.filter.PathFilterGroup
 import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
 import org.eclipse.jgit.lib.*
+import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.diff.RawTextComparator
+import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.patch.FileHeader
+import org.eclipse.jgit.diff.RawText
 
 class GitUtil {
 
@@ -193,6 +198,98 @@ class GitUtil {
         }
         revWalk.release()
         commits
+    }
+
+    List diff(String commit) {
+        def list = []
+        RevWalk revWalk = new RevWalk(repository);
+        try {
+
+            ObjectId objectId = repository.resolve(commit)
+            RevCommit revCommit = revWalk.parseCommit(objectId)
+
+            if (revCommit.getParentCount() == 0) {
+                TreeWalk treeWalk = new TreeWalk(repository)
+                treeWalk.reset()
+                treeWalk.setRecursive(true)
+                treeWalk.addTree(revCommit.getTree())
+                while (treeWalk.next()) {
+//                    list.add(new PathChangeModel(tw.getPathString(), tw.getPathString(), 0, tw
+//                            .getRawMode(0), commit.getId().getName(), ChangeType.ADD));
+                }
+                treeWalk.release()
+            } else {
+                RevCommit parent = revWalk.parseCommit(revCommit.getParent(0).getId())
+
+                DiffFormatter diffFormatter = new GitpipeDiffFormatter(new ByteArrayOutputStream())
+                diffFormatter.setRepository(repository)
+                diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
+                diffFormatter.setDetectRenames(true)
+
+                List<DiffEntry> diffEntries = diffFormatter.scan(parent.tree, revCommit.tree)
+
+                for (DiffEntry diff : diffEntries) {
+                    diffFormatter.format(diff)
+                    diff.changeType.name()
+                    def entry = [:]
+                    entry.type = diff.changeType.name()
+                    entry.newPath = diff.newPath
+                    entry.oldPath = diff.oldPath
+                    entry.newMode = String.format("%o", diff.getNewMode().bits)
+                    entry.oldMode = String.format("%o", diff.getOldMode().bits)
+                    entry.diff = diffFormatter.diff()
+                    entry.add = diffFormatter.add
+                    entry.remove = diffFormatter.remove
+                    list << entry
+                    diffFormatter.reset()
+                }
+
+                diffFormatter.flush()
+            }
+        } finally {
+            revWalk.release()
+        }
+        return list;
+    }
+}
+
+class GitpipeDiffFormatter extends DiffFormatter {
+
+    int add = 0
+    int remove = 0
+    ByteArrayOutputStream out
+    
+    GitpipeDiffFormatter(ByteArrayOutputStream out) {
+        super(out)
+        this.out = out
+    }
+
+    @Override
+    void format(FileHeader head, RawText a, RawText b) {
+        if (head.getPatchType() == FileHeader.PatchType.UNIFIED)
+            format(head.toEditList(), a, b);
+    }
+
+    @Override
+    protected void writeAddedLine(RawText text, int line) {
+        super.writeAddedLine(text, line)
+        add++
+    }
+
+    @Override
+    protected void writeRemovedLine(RawText text, int line) {
+        super.writeRemovedLine(text, line)
+        remove++
+    }
+
+    void reset() {
+        add = 0
+        remove = 0
+        out.reset()
+    }
+
+    String diff() {
+        out.toString()
     }
 
 }

@@ -15,6 +15,11 @@ modules = {
         resource url: 'js/commits.js'
     }
 
+    gitpipe_commitviewer {
+        dependsOn 'jquery, syntax_highlighter'
+        resource url: 'js/commit.js'
+    }
+
     ui_effects_core {
         dependsOn 'jquery'
         resource url: 'js/ui/jquery.effects.core.min.js'
