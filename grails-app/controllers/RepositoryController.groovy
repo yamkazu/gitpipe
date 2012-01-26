@@ -102,6 +102,35 @@ class RepositoryController {
         }
     }
 
+    def commit() {
+        def user = User.findByUsername params.username
+        if (!user) {
+            response.sendError(404)
+            return
+        }
+
+        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
+            params.project == repositoryInfo.projectName
+        }
+        if (!repositoryInfo) {
+            response.sendError(404)
+            return
+        }
+
+        def repository = repositoryInfo.repository()
+
+        withFormat {
+            html {
+                render view: 'commit', model: [user: user, repository: repositoryInfo, 'id': params.commit]
+            }
+            json {
+                render(contentType: "text/json") {
+                    diffs = repository.diff(params.commit)
+                }
+            }
+        }
+    }
+
     def tree() {
         def user = User.findByUsername params.username
         if (!user) {

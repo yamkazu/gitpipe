@@ -26,6 +26,7 @@ class UrlMappings {
         name repository_tree: "/$username/$project/tree/$ref/$path**?"(controller: "repository", action: "tree")
         name repository_blob: "/$username/$project/blob/$ref/$path**?"(controller: "repository", action: "blob")
         name repository_raw: "/$username/$project/raw/$ref/$path**?"(controller: "repository", action: "raw")
+        name repository_commit: "/$username/$project/commit/$commit"(controller: "repository", action: "commit")
         name repository_commits: "/$username/$project/commits/$ref/$path**?"(controller: "repository", action: "commits")
         name project: "/$username/$project"(controller: "repository", action: "show")
         "/repository"(controller: "repository") {

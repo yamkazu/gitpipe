@@ -28,7 +28,8 @@
     vertical-align: baseline;
     width: auto;
     box-sizing: content-box;
-    font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+    /*font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;*/
+    font-family: 'Bitstream Vera Sans Mono','Courier',monospace;
     font-weight: normal;
     font-style: normal;
     font-size: 1em;
@@ -419,3 +420,12 @@
     font-style: italic;
     color: #2a00ff;
 }
+
+.syntaxhighlighter .add {
+    background-color: #DDFFDD;
+}
+
+.syntaxhighlighter .remove {
+    background-color: #FFDDDD;
+}
+

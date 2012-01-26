@@ -91,3 +91,17 @@ span.large {
     font-size: 80%;
 }
 
+.diff {
+    margin-bottom: 20px;
+}
+
+.diff h4 {
+    font-family: 16px;
+    line-height: 20px;
+}
+
+.diff h4 span.label {
+    margin-right: 5px;
+    padding: 0 3px;
+}
+
