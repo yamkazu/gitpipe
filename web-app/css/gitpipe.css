@@ -91,17 +91,45 @@ span.large {
     font-size: 80%;
 }
 
+.changes {
+    display: inline;
+}
+
+.changes .add {
+    color: #46A546;
+    font-weight: bold;
+}
+
+.changes .remove {
+    color: #C43C35;
+    font-weight: bold;
+}
+
 .diff {
     margin-bottom: 20px;
 }
 
 .diff h4 {
+    /* 内部リンクがずれための回避策 */
+    padding-top:80px;
+    margin-top:-80px;
     font-family: 16px;
     line-height: 20px;
+    display: inline;
+}
+
+.diff .title a {
+    padding-top: 4px;
 }
 
 .diff h4 span.label {
-    margin-right: 5px;
-    padding: 0 3px;
+    margin-right: 3px;
+    vertical-align: middle;
+}
+
+.diff h4 small {
+    margin-right: 3px;
+    font-weight: bold;
+    vertical-align: middle;
 }
 

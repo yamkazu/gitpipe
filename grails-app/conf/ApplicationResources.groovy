@@ -16,7 +16,7 @@ modules = {
     }
 
     gitpipe_commitviewer {
-        dependsOn 'jquery, syntax_highlighter'
+        dependsOn 'jquery, syntax_highlighter, bootstrap_twipsy'
         resource url: 'js/commit.js'
     }
 
@@ -55,7 +55,7 @@ modules = {
     }
 
     bootstrap_popover {
-        dependsOn 'jquery, bootstrap'
+        dependsOn 'jquery, bootstrap, bootstrap_twipsy'
         resource url: '/js/bootstrap/bootstrap-popover.js'
     }
 

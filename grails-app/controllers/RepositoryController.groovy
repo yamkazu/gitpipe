@@ -121,7 +121,7 @@ class RepositoryController {
 
         withFormat {
             html {
-                render view: 'commit', model: [user: user, repository: repositoryInfo, 'id': params.commit]
+                render view: 'commit', model: [user: user, repository: repositoryInfo, 'id': params.commit, commit: repository.getLastCommit(params.commit)]
             }
             json {
                 render(contentType: "text/json") {

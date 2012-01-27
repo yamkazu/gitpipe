@@ -232,6 +232,8 @@ class GitUtil {
                     diffFormatter.format(diff)
                     diff.changeType.name()
                     def entry = [:]
+                    entry.newId = diff.newId?.name()
+                    entry.oldId = diff.oldId?.name()
                     entry.type = diff.changeType.name()
                     entry.newPath = diff.newPath
                     entry.oldPath = diff.oldPath
@@ -251,45 +253,46 @@ class GitUtil {
         }
         return list;
     }
+
+    static class GitpipeDiffFormatter extends DiffFormatter {
+
+        int add = 0
+        int remove = 0
+        ByteArrayOutputStream out
+
+        GitpipeDiffFormatter(ByteArrayOutputStream out) {
+            super(out)
+            this.out = out
+        }
+
+        @Override
+        void format(FileHeader head, RawText a, RawText b) {
+            if (head.getPatchType() == FileHeader.PatchType.UNIFIED)
+                format(head.toEditList(), a, b);
+        }
+
+        @Override
+        protected void writeAddedLine(RawText text, int line) {
+            super.writeAddedLine(text, line)
+            add++
+        }
+
+        @Override
+        protected void writeRemovedLine(RawText text, int line) {
+            super.writeRemovedLine(text, line)
+            remove++
+        }
+
+        void reset() {
+            add = 0
+            remove = 0
+            out.reset()
+        }
+
+        String diff() {
+            out.toString()
+        }
+
+    }
 }
 
-class GitpipeDiffFormatter extends DiffFormatter {
-
-    int add = 0
-    int remove = 0
-    ByteArrayOutputStream out
-    
-    GitpipeDiffFormatter(ByteArrayOutputStream out) {
-        super(out)
-        this.out = out
-    }
-
-    @Override
-    void format(FileHeader head, RawText a, RawText b) {
-        if (head.getPatchType() == FileHeader.PatchType.UNIFIED)
-            format(head.toEditList(), a, b);
-    }
-
-    @Override
-    protected void writeAddedLine(RawText text, int line) {
-        super.writeAddedLine(text, line)
-        add++
-    }
-
-    @Override
-    protected void writeRemovedLine(RawText text, int line) {
-        super.writeRemovedLine(text, line)
-        remove++
-    }
-
-    void reset() {
-        add = 0
-        remove = 0
-        out.reset()
-    }
-
-    String diff() {
-        out.toString()
-    }
-
-}
