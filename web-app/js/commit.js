@@ -39,9 +39,7 @@
             return $changes;
         },
 
-        renderCommit:function (data) {
-            var diffs = data.diffs;
-
+        renderCommitInFiles: function(diffs) {
             var $table = $('<table>').addClass('condensed-table');
             var $tbody = $('<tbody>').appendTo($table);
             var sumAdd = 0;
@@ -74,9 +72,10 @@
             }
             this.target.append($table);
             this.target.append($('<p>').text(diffs.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
+        },
 
-            this.target.append($('<h3>').text('Diff'));
-
+        renderDiffs:function(diffs) {
+            this.target.append($('<h3>').text('Diffs'));
             for (var i = 0; i < diffs.length; i++) {
                 var diff = diffs[i];
                 var $diff = $('<div>').addClass('diff');
@@ -133,6 +132,13 @@
                 $code.appendTo($diff);
                 this.target.append($diff);
             }
+
+        },
+
+        renderCommit:function (data) {
+            var diffs = data.diffs;
+            this.renderCommitInFiles(diffs);
+            this.renderDiffs(diffs);
         }
 
     });

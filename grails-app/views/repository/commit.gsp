@@ -11,8 +11,6 @@
 <g:render template="current" model="[ref: id]"/>
 <g:render template="lastCommit" model="[user: user, project: project, ref: id, commit: commit]"/>
 
-<h3>Commit</h3>
-
 <div id="commit"></div>
 
 <r:require module="gitpipe_commitviewer"/>
