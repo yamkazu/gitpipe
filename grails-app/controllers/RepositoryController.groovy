@@ -54,7 +54,6 @@ class RepositoryController extends AbstractController {
                 render(contentType: "text/json") {
                     def diff = repository.diff(id)
                     diffs = diff.diffs.collect { d ->
-                        println d
                         d.newBlobUrl = createBlobLink(diff.newId, d.newPath)
                         d.oldBlobUrl = createBlobLink(diff.oldId, d.oldPath)
                         d
