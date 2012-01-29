@@ -91,6 +91,10 @@ span.large {
     font-size: 80%;
 }
 
+#commit table {
+    border-bottom: 1px solid #DDDDDD;
+}
+
 .changes {
     display: inline;
 }
@@ -111,8 +115,8 @@ span.large {
 
 .diff h4 {
     /* 内部リンクがずれための回避策 */
-    padding-top:80px;
-    margin-top:-80px;
+    padding-top:40px;
+    margin-top:-40px;
     font-family: 16px;
     line-height: 20px;
     display: inline;

@@ -62,14 +62,14 @@
                 <h2 class="">Repositories</h2>
 
                 <g:if test="${sec.username() == user.username}">
-                    <g:link controller="repository" class="btn small">New Repository</g:link>
+                    <g:link controller="project" class="btn small">New Repository</g:link>
                 </g:if>
             </div>
 
             <g:each in="${repositories}" var="repository">
                 <div class="repository-box">
                     <div class="repository-header">
-                        <a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.projectName])}">${repository.projectName}</a>
+                        <a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.name])}">${repository.name}</a>
                     </div>
 
                     <div class="repository-body">

@@ -6,23 +6,10 @@
 
 <body>
 
-%{--<g:render template="header" model="[user: user, repository: repository]"/>--}%
-%{--<g:render template="tabs" model="[user: user, repository: repository, ref: ref, active: 'commits']"/>--}%
-<g:render template="header" model="[user: user, repository: repository]"/>
-<g:render template="tabs" model="[user: user, repository: repository, ref: commit.id.name(), active: 'commits']"/>
+<g:render template="header" model="[user: user, project: project]"/>
+<g:render template="tabs" model="[user: user, project: project, ref: id, active: 'commits']"/>
+<g:render template="lastCommit" model="[user: user, project: project, ref: id, commit: commit]" />
 
-<div class="commit">
-    <time>${new Date(commit.commitTime * 1000L)}</time>
-
-    <div class="meta">
-        <p class="message">${commit.shortMessage}</p>
-        <br>
-
-        <p class="author">${commit.authorIdent.name}</p>
-        <p class="pull-right id">${commit.id.name}</p>
-    </div>
-</div>
-%{--<g:render template="current" model="[ref: commit.id.name()]" />--}%
 
 <h3>Commit</h3>
 
@@ -32,7 +19,7 @@
 <g:javascript>
     $(function () {
         $('#commit').getCommit({
-            url: "${createLink(mapping: 'project', params: ['username': user.username, 'project': repository.projectName])}",
+            url: "${createLink(mapping: 'project', params: ['username': user.username, 'project': project.name])}",
             id: "${id}"
         });
     });

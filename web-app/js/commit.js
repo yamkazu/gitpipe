@@ -46,6 +46,8 @@
 
             var $table = $('<table>').addClass('condensed-table');
             var $tbody = $('<tbody>').appendTo($table);
+            var sumAdd = 0;
+            var sumRemove = 0;
 
             for (var i = 0; i < diffs.length; i++) {
                 var diff = diffs[i];
@@ -59,7 +61,6 @@
                 } else if (diff.type === 'DELETE') {
                     $('<td>').append($('<span class="label important">DELETE</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + diff.oldId).text(diff.oldPath)).appendTo($tr);
-                    $('<td>').text(diff.oldPath).appendTo($tr);
                 } else if (diff.type === 'RENAME') {
                     $('<td>').append($('<span class="label warning">RENAME</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.oldPath + " -> " + diff.newPath)).appendTo($tr);
@@ -68,9 +69,13 @@
                     $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.oldPath + " -> " + diff.newPath)).appendTo($tr);
                 }
                 $('<td>').append(this.createChanges(diff.add, diff.remove)).appendTo($tr);
+                sumAdd += diff.add;
+                sumRemove += diff.remove;
+
                 $tr.appendTo($tbody);
             }
             this.target.append($table);
+            this.target.append($('<p>').text(diffs.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
 
             this.target.append($('<h3>').text('Diff'));
 
@@ -85,31 +90,31 @@
                     $path.append('<span class="label notice">ADD</span>')
                     $path.append($('<small>').text(diff.newMode));
                     $path.append(diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', '#').text(diff.newId));
+                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
                 } else if (diff.type === 'MODIFY') {
                     $path.attr('id', diff.newId);
                     $path.append('<span class="label success">MODIFY</span>');
                     $path.append($('<small>').text(diff.newMode));
                     $path.append(diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', '#').text(diff.newId));
+                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
                 } else if (diff.type === 'DELETE') {
                     $path.attr('id', diff.oldId);
                     $path.append('<span class="label important">DELETE</span>');
-                    $path.append($('<small>').text(diff.newMode));
+                    $path.append($('<small>').text(diff.oldMode));
                     $path.append(diff.oldPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', '#').text(diff.newId));
+                    $title.append($('<a>').addClass('pull-right').attr('href', diff.oldBlobUrl).text(diff.oldId.substr(0, 10)));
                 } else if (diff.type === 'RENAME') {
                     $path.attr('id', diff.newId);
                     $path.append('<span class="label warning">RENAME</span>');
                     $path.append($('<small>').text(diff.newMode));
                     $path.append(diff.oldPath + " -> " + diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', '#').text(diff.newId));
+                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
                 } else if (diff.type === 'COPY') {
                     $path.attr('id', diff.newId);
                     $path.append('<span class="label">COPY</span>');
                     $path.append($('<small>').text(diff.newMode));
                     $path.append(diff.oldPath + " -> " + diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', '#').text(diff.newId));
+                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
                 }
                 $title.appendTo($diff);
                 

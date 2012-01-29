@@ -1,31 +1,30 @@
 ;
 (function ($) {
 
-    var CommitsViewer = function ($this, url, ref, path, offset) {
+    var CommitsViewer = function ($this) {
         this.target = $this;
-        this.base = url;
-        this.ref = ref;
-        this.path = path;
-        this.offset = offset;
+        var that = this;
+        this.readButton = $('<a>').addClass('btn small').text('more read').click(function(e){
+            e.preventDefault();
+            that.getCommits($(this).attr('href'));
+        });
+        this.target.after(this.readButton);
     }
 
     $.extend(CommitsViewer.prototype, {
-
-        getCommits: function() {
+        getCommits:function (url) {
             var that = this;
             $.ajax({
                 type:"get",
                 dataType:"json",
-                data: {offset: that.offset},
-                url: that.createCommitLink(),
+                url: url,
                 success:function (data) {
-                    that.offset++;
                     that.renderCommits(data);
                 }
             });
         },
 
-        renderCommits: function(data) {
+        renderCommits:function (data) {
             var commits = data.commits;
             for (var i = 0; i < commits.length; i++) {
                 var commit = commits[i];
@@ -33,32 +32,34 @@
                 $('<time>').text(commit.date).appendTo($commit);
 
                 var $meta = $('<div>').addClass('meta').appendTo($commit);
-                $('<p>').addClass('message').text(commit.shortMessage).appendTo($meta);
+                $('<p>').addClass('message').text(commit.message).appendTo($meta);
                 $('<br>').appendTo($meta);
-                $('<p>').addClass('author').text(commit.author).appendTo($meta);
-                $('<p>').addClass('pull-right id').text(commit.id).appendTo($meta);
+
+                if (commit.username) {
+                    $('<p>').addClass('author').append($('<a>').attr('href', commit.userurl).text(commit.username)).appendTo($meta);
+                } else {
+                    $('<p>').addClass('author').text(commit.author).appendTo($meta);
+                }
+                $('<p>').addClass('pull-right id').append($('<a>').attr('href', commit.url).text(commit.id.substr(0, 10))).appendTo($meta);
 
                 this.target.append($commit);
             }
-        },
 
-        createCommitLink:function () {
-            return this.base + "/commits/" + this.ref + "/" + this.path;
+            if (!data.next) {
+                this.readButton.remove();
+            } else {
+                this.readButton.attr('href', data.next);
+            }
         }
 
     });
 
-    $.fn.getCommits = function (options) {
-        var opts = $.extend({}, $.fn.getCommits.defaults, options);
+    $.fn.getCommits = function (url) {
         return this.each(function () {
-            var viewer = new CommitsViewer($(this), opts.url, opts.ref, opts.path, opts.offset);
-            viewer.getCommits();
+            var viewer = new CommitsViewer($(this));
+            viewer.getCommits(url);
         });
     };
 
-    $.fn.getCommits.defaults = {
-        path:"",
-        offset: 0
-    }
 
 })(jQuery);

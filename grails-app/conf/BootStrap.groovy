@@ -1,7 +1,7 @@
 import org.gitpipe.Role
 import org.gitpipe.User
 import org.gitpipe.UserRole
-import org.gitpipe.RepositoryInfo
+import org.gitpipe.Project
 
 class BootStrap {
 
@@ -42,7 +42,7 @@ class BootStrap {
         assert Role.count() == 1
         assert UserRole.count() == 1
 
-        new RepositoryInfo(projectName: "test", description: "test description", user: testUser).save(flush: true)
+        new Project(name: "test", description: "test description", user: testUser).save(flush: true)
     }
 
 

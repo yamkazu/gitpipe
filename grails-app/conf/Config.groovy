@@ -104,6 +104,7 @@ grails.dbconsole.urlRoot = '/db/h2/console'
 // gitpipe Configuration:
 gitpipe.config.dir="${userHome}/.gitpipe"
 gitpipe.repositories.dir="${gitpipe.config.dir}/repositories"
+gitpipe.commits.max.fetch.size=20
 
 gitpipe.viewer.support = [
         '.as': 'AS3',

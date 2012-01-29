@@ -1,17 +1,14 @@
 import org.gitpipe.User
-import org.springframework.http.HttpStatus
+import grails.web.RequestParameter
 
-class UserController {
+class UserController extends AbstractController {
+
+    def beforeInterceptor = {
+        this.bindUser()
+    }
 
     def show() {
-        def user = User.findByUsername params.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        render view: 'show', model: [user: user, repositories: user.repositories]
+        model: [user: user, repositories: user.repositories]
     }
 
 }

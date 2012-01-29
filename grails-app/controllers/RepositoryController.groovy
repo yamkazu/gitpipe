@@ -1,225 +1,130 @@
-import grails.plugins.springsecurity.Secured
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.revwalk.RevCommit
-import org.gitpipe.RepositoryInfo
 import org.gitpipe.User
-import org.gitpipe.util.TimeUtils
+import org.gitpipe.util.RepositoryUtil
 
-/**
- * Created by IntelliJ IDEA.
- * User: yamkazu
- * Date: 12/01/17
- * Time: 2:47
- * To change this template use File | Settings | File Templates.
- */
-class RepositoryController {
+class RepositoryController extends AbstractController {
 
-    private static final Log LOG = LogFactory.getLog(RepositoryController.class)
-
-    def springSecurityService
     def grailsApplication
+    RepositoryUtil repository
 
-    @Secured(['ROLE_USER'])
-    def form() {
+    def beforeInterceptor = {
+        bindUser()
+        bindProject()
+        repository = project.repository
     }
 
-    @Secured(['ROLE_USER'])
-    def create() {
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        def repositoryInfo = new RepositoryInfo(params)
-        repositoryInfo.user = user
-        if (!repositoryInfo.save()) {
-            render view: 'form', model: [repositoryInfo: repositoryInfo]
-            return
-        }
-
-        // TODO
-        // change before insert process
-        repositoryInfo.repository().create()
-
-        redirect(uri: "/${user.username}/${repositoryInfo.projectName}")
-    }
-
-    def show() {
-        def user = User.findByUsername params.username
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            response.sendError(404)
-            return
-        }
-
-        def repository = repositoryInfo.repository()
-
-        render view: 'tree', model: [user: user, repository: repositoryInfo, 'ref': repository.defaultBranch, path: '', commit: repository.getLastCommit()]
-    }
-
-    def commits() {
-        def user = User.findByUsername params.username
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            response.sendError(404)
-            return
-        }
-
-        def repository = repositoryInfo.repository()
-
+    def commits(String ref, String path, int page) {
         withFormat {
             html {
-                render view: 'commits', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path]
+                [user: user, project: project, 'ref': ref, path: path]
             }
             json {
                 render(contentType: "text/json") {
-                    commits = array {
-                        for (c in repository.getRevCommit(params.ref, params.path, Integer.decode(params.offset), 20)) {
-                            commit id: c.id.name, shortMessage: c.shortMessage, author: c.authorIdent.name, date: new Date(c.commitTime * 1000L)
-                        }
+                    def cs = repository.getRevCommit(ref, path, page * maxCommitsFetchSize(), maxCommitsFetchSize())
+                    commits = cs.collect { commit ->
+                        commit = commit + findUserByEmail(commit.email)
+                        commit.remove("email") // does not include email address in json response
+                        commit.url = createCommitLink(commit.id)
+                        commit
+                    }
+                    if (!(cs.size() < maxCommitsFetchSize())) {
+                        next = createCommitsLink(ref, path, ++page)
                     }
                 }
             }
         }
     }
 
-    def commit() {
-        def user = User.findByUsername params.username
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            response.sendError(404)
-            return
-        }
-
-        def repository = repositoryInfo.repository()
-
-        withFormat {
-            html {
-                render view: 'commit', model: [user: user, repository: repositoryInfo, 'id': params.commit, commit: repository.getLastCommit(params.commit)]
-            }
-            json {
-                render(contentType: "text/json") {
-                    diffs = repository.diff(params.commit)
-                }
-            }
-        }
+    private String createCommitsLink(String ref, String path, int page) {
+        createLink(mapping: 'repository_commits', params: [username: user.username, project: project.name, ref: ref, path: path, page: page])
     }
 
-    def tree() {
-        def user = User.findByUsername params.username
-        if (!user) {
-            response.sendError(404)
-            return
-        }
+    private int maxCommitsFetchSize() {
+        grailsApplication.config.gitpipe.commits.max.fetch.size
+    }
 
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            response.sendError(404)
-            return
-        }
-
-        def repository = repositoryInfo.repository()
-
+    def commit(String id) {
         withFormat {
             html {
-                render view: 'tree', model: [user: user, repository: repositoryInfo, 'ref': params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
+                def commit = repository.getLastCommit(id)
+                [user: user, project: project, id: id, commit: commit + findUserByEmail(commit.email)]
             }
             json {
                 render(contentType: "text/json") {
-                    current = params.path;
-                    if (params.path) {
-                        parent = new File(params.path).parent ?: ""
-                    }
-                    files = repository.findFilesInPath(params.ref, params.path).collect {
-                        RevCommit commit = repository.getLastCommit(params.ref, it.path)
-
-                        def commitInfo = [message: commit.shortMessage, date: TimeUtils.timeAgo(new Date(commit.commitTime * 1000L))]
-
-                        if (!commit.authorIdent.emailAddress) {
-                            return it + commitInfo
-                        }
-
-                        def author = User.findByEmail(commit.authorIdent.emailAddress)
-                        if (!author) {
-                            return it + commitInfo
-                        }
-                        commitInfo['author'] = author.username
-                        it + commitInfo
-                    }.collect {
-                        def type = it.type
-                        def url = null
-                        if (type == Constants.TYPE_BLOB) {
-                            url = createLink(mapping: 'repository_blob', params: [username: params.username, project: params.project, ref: params.ref, path: it.path]).toString()
-                        } else /*if (type == Constants.TYPE_TREE)*/ {
-                            url = createLink(mapping: 'repository_tree', params: [username: params.username, project: params.project, ref: params.ref, path: it.path]).toString()
-                        }
-                        it + [url: url]
+                    diffs = repository.diff(id).collect { diff ->
+                        diff.newBlobUrl = createBlobLink(id, diff.newPath)
+                        diff.oldBlobUrl = createBlobLink(id, diff.oldPath)
+                        diff
                     }
                 }
             }
         }
     }
 
-    def blob() {
-        def user = User.findByUsername(params.username)
-        if (!user) {
-            LOG.error("cannot found user: ${params.username}")
-            response.sendError(404)
-            return
-        }
+    private String createBlobLink(String ref, String path) {
+        createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path])
+    }
 
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            LOG.error("cannot found projecet: ${params.project}")
-            response.sendError(404)
-            return
-        }
-
-        def repository = repositoryInfo.repository()
-
+    def tree(String ref, String path) {
         withFormat {
             html {
-                render view: 'blob', model: [user: user, repository: repositoryInfo, ref: params.ref, path: params.path, commit: repository.getLastCommit(params.ref)]
+                def commit = repository.getLastCommit(ref)
+                [user: user, project: project, ref: ref, path: path, commit: commit + findUserByEmail(commit.email)]
             }
             json {
+                render(contentType: "text/json") {
+                    current = path;
+                    if (path) {
+                        parent = new File(path).parent ?: ""
+                    }
+                    files = repository.findFilesInPath(ref, path).collect { file ->
+                        file.commit = repository.getLastCommit(params.ref, file.path)
+                        file.commit = file.commit + findUserByEmail(file.commit.email)
+                        file.commit.remove("email") // does not include email address in json response
+                        file.commit.url = createCommitLink(file.commit.id)
+                        file.url = createTreeLink(file.type, ref, file.path)
+                        file
+                    }
+                }
+            }
+        }
+    }
 
+
+    private String createCommitLink(String commit) {
+        createLink(mapping: 'repository_commit', params: [username: user.username, project: project.name, id: commit]).toString()
+    }
+
+    private String createTreeLink(String type, String ref, String path) {
+        if (type == Constants.TYPE_BLOB) {
+            return createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
+        } else /*if (type == Constants.TYPE_TREE)*/ {
+            return createLink(mapping: 'repository_tree', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
+        }
+    }
+
+    private Map<String, String> findUserByEmail(String email) {
+        def author = User.findByEmail(email)
+        if (!author) {
+            return [:]
+        }
+        [username: author.username, userurl: createLink(mapping: 'user', params: [username: author.username])]
+    }
+
+    def blob(String ref, String path) {
+        withFormat {
+            html {
+                [user: user, project: project, ref: ref, path: path, commit: repository.getLastCommit(ref)]
+            }
+            json {
                 // FIXME BIG DATA 対応
                 // 取得最大値を設ける
-                def content = repository.getContent(params.ref, params.path)
+                def content = repository.getContent(ref, path)
 
                 if (RawText.isBinary(content.data)) {
                     render(contentType: "text/json") {
-                        path = params.path
+                        blobPath = path
                         mode = content.mode
                         size = content.size
                         file_type = 'binary'
@@ -228,7 +133,7 @@ class RepositoryController {
                 }
 
                 render(contentType: "text/json") {
-                    path = params.path
+                    blobPath = path
                     mode = content.mode
                     size = content.size
                     file_type = getViewerType(toFileName(path))
@@ -238,31 +143,15 @@ class RepositoryController {
         }
     }
 
-    def raw() {
-        def user = User.findByUsername(params.username)
-        if (!user) {
-            LOG.error("cannot found user: ${params.username}")
-            response.sendError(404)
-            return
-        }
-
-        def repositoryInfo = user.repositories.find { RepositoryInfo repositoryInfo ->
-            params.project == repositoryInfo.projectName
-        }
-        if (!repositoryInfo) {
-            LOG.error("cannot found projecet: ${params.project}")
-            response.sendError(404)
-            return
-        }
-
-        def content = repositoryInfo.repository().getContent(params.ref, params.path)
+    def raw(String ref, String path) {
+        def content = repository.getContent(ref, path)
 
         if (!content.data) {
             // handle not found
         }
 
         response.setContentType(getMimeType(content.data as byte[]))
-        response.setHeader("Content-disposition", "filename=${toFileName(params.path)}")
+        response.setHeader("Content-disposition", "filename=${toFileName(path)}")
         response.outputStream << content.data
     }
 

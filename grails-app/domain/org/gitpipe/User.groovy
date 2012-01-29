@@ -29,7 +29,7 @@ class User {
         password column: '`password`'
     }
 
-    static hasMany = [repositories: RepositoryInfo]
+    static hasMany = [repositories: Project]
 
     Set<Role> getAuthorities() {
         UserRole.findAllByUser(this).collect { it.role } as Set

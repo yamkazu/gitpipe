@@ -1,6 +1,9 @@
 package org.gitpipe.util
 
 import org.apache.commons.lang.StringUtils
+import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.diff.DiffFormatter
+import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.treewalk.TreeWalk
@@ -10,19 +13,14 @@ import org.eclipse.jgit.treewalk.filter.PathFilterGroup
 import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
 import org.eclipse.jgit.lib.*
-import org.eclipse.jgit.diff.DiffFormatter
-import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.patch.FileHeader
-import org.eclipse.jgit.diff.RawText
 
-class GitUtil {
+class RepositoryUtil {
 
     private Repository repository;
 
     static final OBJECT_TYPE_MAP = [(Constants.OBJ_TREE): Constants.TYPE_TREE, (Constants.OBJ_BLOB): Constants.TYPE_BLOB]
 
-    GitUtil(File directory) {
+    RepositoryUtil(File directory) {
         repository = RepositoryCache.open(RepositoryCache.FileKey.exact(directory, FS.DETECTED), false)
     }
 
@@ -69,13 +67,17 @@ class GitUtil {
         }
         content
     }
-    
+
     Map<String, Ref> getBranches() {
         repository.refDatabase.getRefs(Constants.R_HEADS)
     }
 
     Map<String, Ref> getTags() {
         repository.refDatabase.getRefs(Constants.R_TAGS)
+    }
+
+    private Map<String, Object> toMap(TreeWalk treeWalk) {
+        [id: treeWalk.getObjectId(0).name, type: OBJECT_TYPE_MAP.get(treeWalk.getFileMode(0).objectType), path: treeWalk.pathString, name: treeWalk.nameString]
     }
 
     List<Map<String, String>> findFilesInPath(String ref, String path) {
@@ -95,11 +97,7 @@ class GitUtil {
         def foundFolder = false
         if (!path) {
             while (treeWalk.next()) {
-                files << [id: treeWalk.getObjectId(0).name,
-                        type: OBJECT_TYPE_MAP.get(treeWalk.getFileMode(0).objectType),
-                        path: treeWalk.pathString,
-                        name: treeWalk.nameString
-                ]
+                files << toMap(treeWalk)
             }
         } else {
             while (treeWalk.next()) {
@@ -111,11 +109,7 @@ class GitUtil {
                     continue;
                 }
                 if (foundFolder) {
-                    files << [id: treeWalk.getObjectId(0).name,
-                            type: OBJECT_TYPE_MAP.get(treeWalk.getFileMode(0).objectType),
-                            path: treeWalk.pathString,
-                            name: treeWalk.nameString
-                    ]
+                    files << toMap(treeWalk)
                 }
             }
         }
@@ -124,26 +118,45 @@ class GitUtil {
         files
     }
 
-    RevCommit getLastCommit(String ref, String path) {
+    private Map<String, Object> toMap(RevCommit revCommit) {
+        def map = [:]
+        if (!revCommit) {
+            return map
+        }
+
+        map.id = revCommit.id.name
+        map.author = revCommit.authorIdent.name
+        map.email = revCommit.authorIdent.emailAddress
+        map.date = TimeUtils.timeAgo(new Date(revCommit.commitTime * 1000L))
+        map.message = revCommit.shortMessage
+
+        return map
+    }
+
+    Map<String, Object> getLastCommit(String ref, String path) {
         if (!path) {
             return getLastCommit(ref)
         }
 
         List result = getRevCommit(ref, path, 0, 1)
-        if (!result || result.size() == 0) return null;
+        if (!result) {
+            return [:]
+        }
+
         return result.get(0)
     }
+
 
     String getDefaultBranch() {
         return repository.branch
     }
 
-    RevCommit getLastCommit(String ref = repository.branch) {
+    Map<String, Object> getLastCommit(String ref = repository.branch) {
         RevWalk revWalk = null;
         try {
             ObjectId objectId = repository.resolve(ref)
             revWalk = new RevWalk(repository)
-            return revWalk.parseCommit(objectId)
+            return toMap(revWalk.parseCommit(objectId))
         } finally {
             if (revWalk != null) {
                 revWalk.release()
@@ -151,14 +164,14 @@ class GitUtil {
         }
     }
 
-    boolean hasCommits() {
+    private boolean hasCommits() {
         if (repository != null && repository.getDirectory().exists()) {
             return (new File(repository.getDirectory(), "objects").list().length > 2) || (new File(repository.getDirectory(), "objects/pack").list().length > 0)
         }
         return false
     }
 
-    List<RevCommit> getRevCommit(String ref, String path, int offset, int maxCount) {
+    List<Map<String, Object>> getRevCommit(String ref, String path, int offset, int maxCount) {
         def commits = []
 
         if (maxCount == 0 || !hasCommits()) {
@@ -182,7 +195,7 @@ class GitUtil {
             for (RevCommit rev: revlog) {
                 count++
                 if (count > offset) {
-                    commits.add(rev);
+                    commits << toMap(rev)
                     if (maxCount > 0 && commits.size() == maxCount) {
                         break
                     }
@@ -190,7 +203,7 @@ class GitUtil {
             }
         } else {
             for (RevCommit rev: revlog) {
-                commits.add(rev);
+                commits << toMap(rev)
                 if (maxCount > 0 && commits.size() == maxCount) {
                     break
                 }
@@ -200,7 +213,7 @@ class GitUtil {
         commits
     }
 
-    List diff(String commit) {
+    List<Map<String, Object>> diff(String commit) {
         def list = []
         RevWalk revWalk = new RevWalk(repository);
         try {
@@ -228,7 +241,7 @@ class GitUtil {
 
                 List<DiffEntry> diffEntries = diffFormatter.scan(parent.tree, revCommit.tree)
 
-                for (DiffEntry diff : diffEntries) {
+                for (DiffEntry diff: diffEntries) {
                     diffFormatter.format(diff)
                     diff.changeType.name()
                     def entry = [:]
@@ -254,45 +267,5 @@ class GitUtil {
         return list;
     }
 
-    static class GitpipeDiffFormatter extends DiffFormatter {
-
-        int add = 0
-        int remove = 0
-        ByteArrayOutputStream out
-
-        GitpipeDiffFormatter(ByteArrayOutputStream out) {
-            super(out)
-            this.out = out
-        }
-
-        @Override
-        void format(FileHeader head, RawText a, RawText b) {
-            if (head.getPatchType() == FileHeader.PatchType.UNIFIED)
-                format(head.toEditList(), a, b);
-        }
-
-        @Override
-        protected void writeAddedLine(RawText text, int line) {
-            super.writeAddedLine(text, line)
-            add++
-        }
-
-        @Override
-        protected void writeRemovedLine(RawText text, int line) {
-            super.writeRemovedLine(text, line)
-            remove++
-        }
-
-        void reset() {
-            add = 0
-            remove = 0
-            out.reset()
-        }
-
-        String diff() {
-            out.toString()
-        }
-
-    }
 }
 
