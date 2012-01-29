@@ -1,4 +1,4 @@
-<h3><small>Latest commit to the <strong>${ref}</strong> branch</small></h3>
+<h3><small>Latest commit to the <strong>${ref}</strong></small></h3>
 <div class="commit">
     <time>${commit.date}</time>
 

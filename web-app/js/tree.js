@@ -1,12 +1,9 @@
 ;
 (function ($) {
 
-    var TreeViewer = function ($this, base, ref, rootName) {
+    var TreeViewer = function ($this) {
         var that = this;
         this.target = $this;
-        this.base = base;
-        this.ref = ref;
-        this.rootName = rootName;
 
         this.nav = $('<ul>').addClass('breadcrumb').appendTo(this.target);
         this.content = $('<div>').appendTo(this.target);
@@ -27,46 +24,36 @@
     };
 
     $.extend(TreeViewer.prototype, {
-        renderNav:function (path) {
+        renderNav:function (currnet, parents) {
             var that = this;
             that.nav.empty();
 
-            var $li = $('<li>').appendTo(that.nav);
-            if (!path || path.length === 0) {
-                $li.text(that.rootName).addClass('active');
-                return;
-            }
-            $('<a>').attr('href', that.createTreeLink("")).text(that.rootName).click(
-                function (e) {
-                    e.preventDefault();
-                    that.hideContentAsBack(function () {
-                        that.getTree(that.createTreeLink(""));
-                    });
-                }).appendTo($li);
-            $li.append($('<span>').addClass('divider').text('/'));
-
-            var paths = path.split('/');
-            var tmpPath = "";
-            for (var i = 0; i < paths.length; i++) {
-                (function (rootPath, path) {
-                    var newPath = rootPath ? rootPath + "/" + path : path;
-                    tmpPath = newPath;
-                    var $item = $('<li>');
-                    if ((i + 1) == paths.length) { // 末端要素
-                        $item.text(path).addClass('active').appendTo(that.nav);
-                        return;
-                    }
-                    $('<a>').attr('href', that.createTreeLink(newPath)).text(path).click(
-                        function (e) {
-                            e.preventDefault();
-                            that.hideContentAsBack(function () {
-                                that.getTree(that.createTreeLink(newPath));
-                            });
-                        }).appendTo($item);
-                    $item.append($('<span>').addClass('divider').text('/')).appendTo(that.nav);
-                })(tmpPath, paths[i]);
+            if (parents) {
+                for (var i = 0; i < parents.length; i++) {
+                    (function (parent) {
+                        that.renderNavPath(parent);
+                    })(parents[i]);
+                }
             }
 
+            that.renderNavPath(currnet, true);
+        },
+
+        renderNavPath:function(pathInfo, current) {
+            var $path = $('<li>');
+            var that = this;
+            if (current) {
+                $path.text(pathInfo.name).addClass('active').appendTo(that.nav);
+            } else {
+                $('<a>').attr('href', pathInfo.url).text(pathInfo.name).click(
+                    function (e) {
+                        e.preventDefault();
+                        that.hideContentAsBack(function () {
+                            that.getTree(pathInfo.url);
+                        });
+                    }).appendTo($path);
+                $path.append($('<span>').addClass('divider').text('/')).appendTo(that.nav);
+            }
         },
 
         pushHistory:function (type, url, pushState) {
@@ -137,7 +124,7 @@
             if (data.file_type === 'binary') {
                 this.content.append($('<div>').addClass('well').text('no viewer'));
                 this.slideContent("show");
-                this.renderNav(data.path);
+                this.renderNav(data.current, data.parents);
                 return;
             }
 
@@ -151,7 +138,7 @@
 
             this.content.append($code);
             this.slideContent("show");
-            this.renderNav(data.path);
+            this.renderNav(data.current, data.parents);
         },
 
         renderBlobInfo:function (data) {
@@ -159,7 +146,7 @@
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
-            $actions.append($('<a>').attr('href', this.createRawLink(data.path)).text('raw'));
+            $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
             return $info;
         },
 
@@ -217,7 +204,7 @@
 
             this.content.append($table);
             this.slideContent("show");
-            this.renderNav(data.current);
+            this.renderNav(data.current, data.parents);
         },
 
         slideContent:function (mode, direction, callback) {
@@ -231,12 +218,12 @@
 
         renderTrAsParent:function (parent, $tr) {
             var that = this;
-            if (parent || parent === "") {
+            if (parent) {
                 $('<td>').appendTo($tr);
-                $('<td>').append($('<a>').text('..').attr('href', that.createTreeLink(parent)).click(function (e) {
+                $('<td>').append($('<a>').text('..').attr('href', parent).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsBack(function () {
-                        that.getTree(that.createTreeLink(parent));
+                        that.getTree(parent);
                     });
                 })).appendTo($tr);
                 $('<td>').appendTo($tr);
@@ -245,26 +232,14 @@
 
         },
 
-        createTreeLink:function (path) {
-            return this.base + "/tree/" + this.ref + "/" + path;
-        },
-
-        createBlobLink:function (path) {
-            return this.base + "/blob/" + this.ref + "/" + path;
-        },
-
-        createRawLink:function (path) {
-            return this.base + "/raw/" + this.ref + "/" + path;
-        },
-
         renderTrAsBlob:function (current, file, $tr) {
             var that = this;
             (function (current, file, $tr) {
                 $('<td>').text(file.type).appendTo($tr);
-                $('<td>').append($('<a>').text(file.name).attr('href', that.createBlobLink(current !== "" ? current + "/" + file.name : file.name)).click(function (e) {
+                $('<td>').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsForward(function () {
-                        that.getBlob(that.createBlobLink(current !== "" ? current + "/" + file.name : file.name));
+                        that.getBlob(file.url);
                     });
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
@@ -280,10 +255,10 @@
             var that = this;
             (function (current, file, $tr) {
                 $('<td>').text(file.type).appendTo($tr);
-                $('<td>').append($('<a>').text(file.name).attr('href', that.createTreeLink(current !== "" ? current + "/" + file.name : file.name)).click(function (e) {
+                $('<td>').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsForward(function () {
-                        that.getTree(that.createTreeLink(current !== "" ? current + "/" + file.name : file.name));
+                        that.getTree(file.url);
                     });
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
@@ -297,25 +272,19 @@
     });
 
 
-    $.fn.gitTree = function (options) {
-        var opts = $.extend({}, $.fn.gitTree.defaults, options);
+    $.fn.gitTree = function (url) {
         return this.each(function () {
-            var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
-            viewer.getTree(viewer.createTreeLink(opts.path), location.pathname, false);
+            var viewer = new TreeViewer($(this));
+            viewer.getTree(url, location.pathname, false);
         });
     };
 
-    $.fn.gitBlob = function (options) {
-        var opts = $.extend({}, $.fn.gitTree.defaults, options);
+    $.fn.gitBlob = function (url) {
         return this.each(function () {
-            var viewer = new TreeViewer($(this), opts.url, opts.ref, opts.rootName);
-            viewer.getBlob(viewer.createBlobLink(opts.path), location.pathname, false);
+            var viewer = new TreeViewer($(this));
+            viewer.getBlob(url, location.pathname, false);
         });
     };
 
-    $.fn.gitTree.defaults = {
-        path:"",
-        rootName:"root"
-    }
 
 })(jQuery);

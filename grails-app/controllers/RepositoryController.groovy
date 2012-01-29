@@ -52,10 +52,12 @@ class RepositoryController extends AbstractController {
             }
             json {
                 render(contentType: "text/json") {
-                    diffs = repository.diff(id).collect { diff ->
-                        diff.newBlobUrl = createBlobLink(id, diff.newPath)
-                        diff.oldBlobUrl = createBlobLink(id, diff.oldPath)
-                        diff
+                    def diff = repository.diff(id)
+                    diffs = diff.diffs.collect { d ->
+                        println d
+                        d.newBlobUrl = createBlobLink(diff.newId, d.newPath)
+                        d.oldBlobUrl = createBlobLink(diff.oldId, d.oldPath)
+                        d
                     }
                 }
             }
@@ -66,6 +68,10 @@ class RepositoryController extends AbstractController {
         createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path])
     }
 
+    private String createRawLink(String ref, String path) {
+        createLink(mapping: 'repository_raw', params: [username: user.username, project: project.name, ref: ref, path: path])
+    }
+
     def tree(String ref, String path) {
         withFormat {
             html {
@@ -74,9 +80,9 @@ class RepositoryController extends AbstractController {
             }
             json {
                 render(contentType: "text/json") {
-                    current = path;
+                    current = createCurrentTreeLink(ref, path)
                     if (path) {
-                        parent = new File(path).parent ?: ""
+                        parents = createParentsTreeLink(ref, path)
                     }
                     files = repository.findFilesInPath(ref, path).collect { file ->
                         file.commit = repository.getLastCommit(params.ref, file.path)
@@ -89,6 +95,30 @@ class RepositoryController extends AbstractController {
                 }
             }
         }
+    }
+
+    private Map<String, String> createCurrentTreeLink(String ref, String path) {
+        if (!path) {
+            return [name: project.name, path: "", url: createTreeLink(Constants.TYPE_TREE, ref, "")] // this is root link
+        }
+        [name: new File(path).name, path: path, url: createTreeLink(Constants.TYPE_TREE, ref, path)]
+    }
+
+    private Map<String, String> createCurrentBlobLink(String ref, String path) {
+        [name: new File(path).name, path: path, url: createBlobLink(ref, path)]
+    }
+
+    private List<Map<String, String>> createParentsTreeLink(String ref, String path) {
+        def parents = []
+        File parent = new File(path).parentFile;
+
+        while (parent != null) {
+            parents << [name: parent.name, path: parent.path, url: createTreeLink(Constants.TYPE_TREE, ref, parent.path)]
+            parent = parent.parentFile
+        }
+
+        parents << [name: project.name, path: "", url: createTreeLink(Constants.TYPE_TREE, ref, "")] // this is root link
+        parents.reverse()
     }
 
 
@@ -124,7 +154,9 @@ class RepositoryController extends AbstractController {
 
                 if (RawText.isBinary(content.data)) {
                     render(contentType: "text/json") {
-                        blobPath = path
+                        current = createCurrentBlobLink(ref, path)
+                        parents = createParentsTreeLink(ref, path)
+                        rawUrl = createRawLink(ref, path)
                         mode = content.mode
                         size = content.size
                         file_type = 'binary'
@@ -133,7 +165,9 @@ class RepositoryController extends AbstractController {
                 }
 
                 render(contentType: "text/json") {
-                    blobPath = path
+                    current = createCurrentBlobLink(ref, path)
+                    rawUrl = createRawLink(ref, path)
+                    parents = createParentsTreeLink(ref, path)
                     mode = content.mode
                     size = content.size
                     file_type = getViewerType(toFileName(path))

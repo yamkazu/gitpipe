@@ -16,12 +16,7 @@
 <r:require module="gitpipe_treeviewer"/>
 <g:javascript>
     $(function () {
-        $('#tree').gitTree({
-            rootName: "${project.name}",
-            url: "${createLink(mapping: 'project', params: ['username': user.username, 'project': project.name])}",
-            ref: "${ref}",
-            path: "${path}"
-        });
+        $('#tree').gitTree("${createLink(mapping: 'repository_tree', params: [username: user.username, project: project.name, ref: ref, path: path])}");
     });
 </g:javascript>
 

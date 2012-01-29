@@ -1,20 +1,18 @@
 ;
 (function ($) {
 
-    var CommitViewer = function ($this, url, id) {
+    var CommitViewer = function ($this) {
         this.target = $this;
-        this.base = url;
-        this.id = id;
     }
 
     $.extend(CommitViewer.prototype, {
 
-        getCommit:function () {
+        getCommit:function (url) {
             var that = this;
             $.ajax({
                 type:"get",
                 dataType:"json",
-                url:that.createCommitLink(),
+                url:url,
                 success:function (data) {
                     that.renderCommit(data);
                 }
@@ -117,7 +115,6 @@
                     $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
                 }
                 $title.appendTo($diff);
-                
 
                 var brush = new SyntaxHighlighter.brushes['Diff']();
                 brush.init({toolbar:false, gutter:false});
@@ -136,23 +133,15 @@
                 $code.appendTo($diff);
                 this.target.append($diff);
             }
-        },
-
-        createCommitLink:function () {
-            return this.base + "/commit/" + this.id;
         }
 
     });
 
-    $.fn.getCommit = function (options) {
-        var opts = $.extend({}, $.fn.getCommit.defaults, options);
+    $.fn.getCommit = function (url) {
         return this.each(function () {
-            var viewer = new CommitViewer($(this), opts.url, opts.id);
-            viewer.getCommit();
+            var viewer = new CommitViewer($(this));
+            viewer.getCommit(url);
         });
     };
-
-    $.fn.getCommit.defaults = {
-    }
 
 })(jQuery);
