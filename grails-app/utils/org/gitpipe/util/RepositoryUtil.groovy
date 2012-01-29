@@ -209,6 +209,8 @@ class RepositoryUtil {
                 diff.oldId = newCommit.getParent(0).getId().name()
                 RevCommit parentCommit = revWalk.parseCommit(newCommit.getParent(0).getId())
                 oldTreeParser.reset(reader, parentCommit.tree);
+            } else {
+                diff.oldId = ObjectId.zeroId().name()
             }
 
             GitpipeDiffFormatter diffFormatter = new GitpipeDiffFormatter(new ByteArrayOutputStream())
