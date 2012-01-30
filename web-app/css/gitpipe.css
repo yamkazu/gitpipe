@@ -47,6 +47,10 @@ body {
     padding: 0 10px;
 }
 
+.blob-info a {
+    padding-left: 10px;
+}
+
 .blob-info span:nth-child(n+2) {
     border-left: 1px #DDDDDD solid;
 }
@@ -137,3 +141,6 @@ span.large {
     vertical-align: middle;
 }
 
+.breadcrumb {
+    background-image: none;
+}

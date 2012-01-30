@@ -36,8 +36,12 @@ class RepositoryController extends AbstractController {
         }
     }
 
-    private String createCommitsLink(String ref, String path, int page) {
-        createLink(mapping: 'repository_commits', params: [username: user.username, project: project.name, ref: ref, path: path, page: page])
+    private String createCommitsLink(String ref, String path, Integer page = null) {
+        def params = [username: user.username, project: project.name, ref: ref, path: path]
+        if (page) {
+            params.page = page
+        }
+        createLink(mapping: 'repository_commits', params: params).toString()
     }
 
     private int maxCommitsFetchSize() {
@@ -80,6 +84,7 @@ class RepositoryController extends AbstractController {
             json {
                 render(contentType: "text/json") {
                     current = createCurrentTreeLink(ref, path)
+                    historyUrl = createCommitsLink(ref, path)
                     if (path) {
                         parents = createParentsTreeLink(ref, path)
                     }
@@ -151,26 +156,20 @@ class RepositoryController extends AbstractController {
                 // 取得最大値を設ける
                 def content = repository.getContent(ref, path)
 
-                if (RawText.isBinary(content.data)) {
-                    render(contentType: "text/json") {
-                        current = createCurrentBlobLink(ref, path)
-                        parents = createParentsTreeLink(ref, path)
-                        rawUrl = createRawLink(ref, path)
-                        mode = content.mode
-                        size = content.size
-                        file_type = 'binary'
-                    }
-                    return
-                }
-
                 render(contentType: "text/json") {
                     current = createCurrentBlobLink(ref, path)
-                    rawUrl = createRawLink(ref, path)
                     parents = createParentsTreeLink(ref, path)
+                    historyUrl = createCommitsLink(ref, path)
+                    rawUrl = createRawLink(ref, path)
                     mode = content.mode
                     size = content.size
-                    file_type = getViewerType(toFileName(path))
-                    data = new String(content.data, Constants.CHARSET)
+
+                    if (RawText.isBinary(content.data)) {
+                        file_type = 'binary'
+                    } else {
+                        file_type = getViewerType(toFileName(path))
+                        data = new String(content.data, Constants.CHARSET)
+                    }
                 }
             }
         }

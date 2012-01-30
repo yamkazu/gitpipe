@@ -146,6 +146,7 @@
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
+            $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
             return $info;
         },
@@ -185,7 +186,8 @@
                 .append($('<th>').text(''))
                 .append($('<th>').text('name'))
                 .append($('<th>').text('age'))
-                .append($('<th>').text('message')).appendTo($thead);
+                .append($('<th>').text('message'))
+                .append($('<th>').append($('<a>').attr('href', data.historyUrl).text('history'))).appendTo($thead);
 
             // tbody
             var $tbody = $('<tbody>').appendTo($table);
@@ -228,8 +230,8 @@
                 })).appendTo($tr);
                 $('<td>').appendTo($tr);
                 $('<td>').appendTo($tr);
+                $('<td>').appendTo($tr);
             }
-
         },
 
         renderTrAsBlob:function (current, file, $tr) {
@@ -248,6 +250,7 @@
                     message.append('&nbsp;')
                     $('<a>').attr('href', file.commit.userurl).text('[' + file.commit.username + ']').appendTo(message);
                 }
+                $('<td>').appendTo($tr);
             })(current, file, $tr);
         },
 
@@ -267,6 +270,7 @@
                     message.append('&nbsp;')
                     $('<a>').attr('href', file.commit.userurl).text('[' + file.commit.username + ']').appendTo(message);
                 }
+                $('<td>').appendTo($tr);
             })(current, file, $tr);
         }
     });
