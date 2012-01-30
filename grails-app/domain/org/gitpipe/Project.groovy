@@ -2,7 +2,7 @@ package org.gitpipe
 
 import org.eclipse.jgit.lib.Constants
 
-import org.gitpipe.util.RepositoryUtil
+import org.gitpipe.git.GpRepository
 
 class Project {
 
@@ -17,8 +17,8 @@ class Project {
         name(blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_]+", unique: ['user', 'name'])
     }
 
-    RepositoryUtil getRepository() {
-        new RepositoryUtil(directory())
+    GpRepository getRepository() {
+        new GpRepository(directory())
     }
 
     private File directory() {

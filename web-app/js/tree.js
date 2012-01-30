@@ -117,6 +117,33 @@
             });
         },
 
+        getBlame:function (url, pushUrl, pushState) {
+            pushUrl = pushUrl || url;
+            var that = this;
+
+            var cache = that.target.data(pushUrl);
+            if (cache) {
+                that.pushHistory("blame", pushUrl, pushState);
+                that.renderBlob(cache);
+                return;
+            }
+
+            $.ajax({
+                type:"get",
+                dataType:"json",
+                url:url,
+                success:function (data) {
+                    that.target.data(pushUrl, data);
+                    if (pushUrl !== url) {
+                        that.target.data(url, data);
+                    }
+                    that.pushHistory("blame", pushUrl, pushState);
+                    that.renderBlame(data);
+                }
+            });
+        },
+
+
 
         renderBlob:function (data) {
             this.content.append(this.renderBlobInfo(data));
@@ -135,6 +162,44 @@
 
             var $code = $(html);
             $('.code div', $code).removeClass('container');
+
+            this.content.append($code);
+            this.slideContent("show");
+            this.renderNav(data.current, data.parents);
+        },
+
+        renderBlame:function (data) {
+//            this.content.append(this.renderBlobInfo(data));
+
+//            if (data.file_type === 'binary') {
+//                this.content.append($('<div>').addClass('well').text('no viewer'));
+//                this.slideContent("show");
+//                this.renderNav(data.current, data.parents);
+//                return;
+//            }
+
+            var brush = new SyntaxHighlighter.brushes[data.raw.type]();
+
+            brush.init({toolbar:false});
+            var html = brush.getHtml(data.raw.file);
+
+            var $code = $(html);
+            $('.code div', $code).removeClass('container');
+
+            var $tr = $('tr', $code)
+            var $td = $('<td>').prependTo($tr);
+
+            var entries = data.entries;
+            var current = 0;
+            for (var i = 0;  i < entries.length; i++) {
+                var entry = entries[i];
+                for (var j = 0; j < entry.length; j++) {
+                    $td.append($('<div>').text(entry.commit.id.substr(0, 10)));
+                }
+            }
+//            for (var i = 0; i < 107; i++) {
+//                $td.append($('<div>aaa</div>'));
+//            }
 
             this.content.append($code);
             this.slideContent("show");
@@ -287,6 +352,13 @@
         return this.each(function () {
             var viewer = new TreeViewer($(this));
             viewer.getBlob(url, location.pathname, false);
+        });
+    };
+
+    $.fn.gitBlame = function (url) {
+        return this.each(function () {
+            var viewer = new TreeViewer($(this));
+            viewer.getBlame(url, location.pathname, false);
         });
     };
 

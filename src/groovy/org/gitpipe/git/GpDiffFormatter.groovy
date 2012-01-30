@@ -1,16 +1,16 @@
-package org.gitpipe.util
+package org.gitpipe.git
 
 import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.patch.FileHeader
 
-class GitpipeDiffFormatter extends DiffFormatter {
+class GpDiffFormatter extends DiffFormatter {
 
     int add = 0
     int remove = 0
     ByteArrayOutputStream out
 
-    GitpipeDiffFormatter(ByteArrayOutputStream out) {
+    GpDiffFormatter(ByteArrayOutputStream out) {
         super(out)
         this.out = out
     }

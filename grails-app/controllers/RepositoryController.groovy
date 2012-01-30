@@ -1,12 +1,13 @@
 import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.lib.Constants
 import org.gitpipe.User
-import org.gitpipe.util.RepositoryUtil
+import org.gitpipe.git.GpBlame
+import org.gitpipe.git.GpRepository
 
 class RepositoryController extends AbstractController {
 
     def grailsApplication
-    RepositoryUtil repository
+    GpRepository repository
 
     def beforeInterceptor = {
         bindUser()
@@ -144,6 +145,52 @@ class RepositoryController extends AbstractController {
             return [:]
         }
         [username: author.username, userurl: createLink(mapping: 'user', params: [username: author.username])]
+    }
+
+    def blame(String ref, String path) {
+        withFormat {
+            html {
+                [user: user, project: project, ref: ref, path: path, commit: repository.getLastCommit(ref)]
+            }
+            json {
+                render(contentType: "text/json") {
+                    GpBlame blame = repository.blame(ref, path)
+
+                    current = createCurrentBlobLink(ref, path)
+                    parents = createParentsTreeLink(ref, path)
+                    historyUrl = createCommitsLink(ref, path)
+                    rawUrl = createRawLink(ref, path)
+
+                    raw {
+                        mode = blame.raw.mode
+                        size = blame.raw.size
+                        if (blame.raw.isBinary()) {
+                            type = 'binary'
+                        } else {
+                            type = getViewerType(toFileName(path))
+                            file = blame.raw.getFileAsString()
+                        }
+                    }
+
+                    entries = array {
+                        for (entry in blame.entries) {
+                            e {
+                                start = entry.start
+                                end = entry.end
+                                length = entry.length
+                                commit {
+                                    id = entry.commit.id
+                                    date = entry.commit.date
+                                    author = {
+                                        name = entry.commit.author.name
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     def blob(String ref, String path) {

@@ -685,7 +685,7 @@ function findBrush(alias, showAlert)
 function eachLine(str, callback)
 {
 	var lines = splitLines(str);
-	
+
 	for (var i = 0; i < lines.length; i++)
 		lines[i] = callback(lines[i], i);
 		
@@ -702,7 +702,8 @@ function eachLine(str, callback)
  */
 function trimFirstAndLastLines(str)
 {
-	return str.replace(/^[ ]*[\n]+|[\n]*[ ]*$/g, '');
+    //	return str.replace(/^[ ]*[\n]+|[\n]*[ ]*$/g, '');
+    return str.replace(/^[ ]*[\n]+|[\n]$/g, '');
 };
 
 /**
@@ -1351,12 +1352,12 @@ sh.Highlighter.prototype = {
 		var lines = [],
 			firstLine = parseInt(this.getParam('first-line'))
 			;
-		
+
 		eachLine(code, function(line, index)
 		{
 			lines.push(index + firstLine);
 		});
-		
+
 		return lines;
 	},
 	
@@ -1541,7 +1542,7 @@ sh.Highlighter.prototype = {
 			matches,
 			lineNumbers
 			;
-		
+
 		// process light mode
 		if (this.getParam('light') == true)
 			this.params.toolbar = this.params.gutter = false;

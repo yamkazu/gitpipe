@@ -1,6 +1,7 @@
-package org.gitpipe.util
+package org.gitpipe.git
 
 import org.apache.commons.lang.StringUtils
+import org.eclipse.jgit.blame.BlameGenerator
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.RawTextComparator
 import org.eclipse.jgit.revwalk.RevCommit
@@ -12,15 +13,16 @@ import org.eclipse.jgit.treewalk.filter.PathFilter
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup
 import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
+import org.gitpipe.util.TimeUtils
 import org.eclipse.jgit.lib.*
 
-class RepositoryUtil {
+class GpRepository {
 
     private Repository repository;
 
     static final OBJECT_TYPE_MAP = [(Constants.OBJ_TREE): Constants.TYPE_TREE, (Constants.OBJ_BLOB): Constants.TYPE_BLOB]
 
-    RepositoryUtil(File directory) {
+    GpRepository(File directory) {
         repository = RepositoryCache.open(RepositoryCache.FileKey.exact(directory, FS.DETECTED), false)
     }
 
@@ -192,6 +194,59 @@ class RepositoryUtil {
         commits
     }
 
+    GpRaw raw(String ref, String path) {
+        RevWalk revWalk = null
+        TreeWalk treeWalk = null
+        GpRaw raw = null
+
+        try {
+            ObjectId objectId = repository.resolve(ref)
+
+            revWalk = new RevWalk(repository)
+            RevCommit revCommit = revWalk.parseCommit(objectId)
+
+            treeWalk = new TreeWalk(repository)
+            treeWalk.addTree(revCommit.tree)
+            treeWalk.setFilter(PathFilterGroup.createFromStrings(Collections.singleton(path)))
+
+            while (treeWalk.next()) {
+                if (treeWalk.isSubtree() && !path.equals(treeWalk.getPathString())) {
+                    treeWalk.enterSubtree();
+                    continue;
+                }
+                ObjectLoader objectLoader = repository.open(treeWalk.getObjectId(0), Constants.OBJ_BLOB)
+                raw = new GpRaw(treeWalk, objectLoader)
+            }
+        } finally {
+            release(treeWalk)
+            release(revWalk)
+        }
+        raw
+    }
+
+    GpBlame blame(String ref, String path) {
+        BlameGenerator generator = null
+        GpBlame blame = null
+        try {
+            blame = new GpBlame(raw(ref, path))
+            generator = new BlameGenerator(repository, path)
+            generator.push("", repository.resolve(ref))
+            while (generator.next()) {
+                blame << new GpBlameEntry(generator)
+            }
+            blame.sort()
+        } finally {
+            release(generator)
+        }
+        blame
+    }
+
+    private void release(BlameGenerator generator) {
+        if (generator) {
+            generator.release()
+        }
+    }
+
     Map<String, Object> diff(String commit) {
         def diff = [:]
         RevWalk revWalk = null
@@ -213,7 +268,7 @@ class RepositoryUtil {
                 diff.oldId = ObjectId.zeroId().name()
             }
 
-            GitpipeDiffFormatter diffFormatter = new GitpipeDiffFormatter(new ByteArrayOutputStream())
+            GpDiffFormatter diffFormatter = new GpDiffFormatter(new ByteArrayOutputStream())
             diffFormatter.setRepository(repository)
             diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
             diffFormatter.setDetectRenames(true)
@@ -260,7 +315,7 @@ class RepositoryUtil {
         [id: treeWalk.getObjectId(0).name, type: OBJECT_TYPE_MAP.get(treeWalk.getFileMode(0).objectType), path: treeWalk.pathString, name: treeWalk.nameString]
     }
 
-    private Map<String, Object> toMap(GitpipeDiffFormatter diffFormatter, DiffEntry diffEntry) {
+    private Map<String, Object> toMap(GpDiffFormatter diffFormatter, DiffEntry diffEntry) {
         def entry = [:]
         entry.newId = diffEntry.newId?.name()
         entry.oldId = diffEntry.oldId?.name()
