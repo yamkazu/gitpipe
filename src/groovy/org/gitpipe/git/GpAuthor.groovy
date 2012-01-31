@@ -7,7 +7,7 @@ class GpAuthor {
     String name
     String email
 
-    GpAuthor (PersonIdent personIdent) {
+    GpAuthor(PersonIdent personIdent) {
         this.name = personIdent.name
         this.email = personIdent.emailAddress
     }

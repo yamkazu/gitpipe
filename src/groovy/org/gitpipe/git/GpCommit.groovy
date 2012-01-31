@@ -1,9 +1,10 @@
 package org.gitpipe.git
 
+import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.revwalk.RevCommit
 
 class GpCommit {
-    
+
     String id
     String message
     GpAuthor author

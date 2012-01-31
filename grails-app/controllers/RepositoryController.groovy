@@ -1,9 +1,11 @@
+import grails.web.RequestParameter
 import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.lib.Constants
+import org.eclipse.jgit.lib.ObjectId
 import org.gitpipe.User
 import org.gitpipe.git.GpBlame
+import org.gitpipe.git.GpDiff
 import org.gitpipe.git.GpRepository
-import org.gitpipe.util.TimeUtils
 
 class RepositoryController extends AbstractController {
 
@@ -50,19 +52,41 @@ class RepositoryController extends AbstractController {
         grailsApplication.config.gitpipe.commits.max.fetch.size
     }
 
-    def commit(String id) {
+    def commit(@RequestParameter('id') String commitId) {
         withFormat {
             html {
-                def commit = repository.getLastCommit(id)
-                [user: user, project: project, id: id, commit: commit + findUserByEmail(commit.email)]
+                def commit = repository.getLastCommit(commitId)
+                [user: user, project: project, id: commitId, commit: commit + findUserByEmail(commit.email)]
             }
             json {
                 render(contentType: "text/json") {
-                    def diff = repository.diff(id)
-                    diffs = diff.diffs.collect { d ->
-                        d.newBlobUrl = createBlobLink(diff.newId, d.newPath)
-                        d.oldBlobUrl = createBlobLink(diff.oldId, d.oldPath)
-                        d
+                    GpDiff d = repository.diff(commitId)
+                    entries = array {
+                        for (entry in d.entries) {
+                            e = {
+                                type = entry.type
+                                if (entry.newId && ObjectId.zeroId().name != entry.newId) {
+                                    newFile = {
+                                        id = entry.newId
+                                        path = entry.newPath
+                                        mode = entry.newMode
+                                        blobUrl = createBlobLink(d.newCommit.id, entry.newPath)
+                                    }
+
+                                }
+                                if (entry.oldId && ObjectId.zeroId().name != entry.oldId) {
+                                    oldFile = {
+                                        id = entry.oldId
+                                        path = entry.oldPath
+                                        mode = entry.oldMode
+                                        blobUrl = createBlobLink(d.oldCommit.id, entry.oldPath)
+                                    }
+                                }
+                                addLine = entry.addLine
+                                removeLine = entry.removeLine
+                                diff = entry.diff
+                            }
+                        }
                     }
                 }
             }

@@ -242,48 +242,45 @@ class GpRepository {
         blame
     }
 
-    private void release(BlameGenerator generator) {
-        if (generator) {
-            generator.release()
-        }
-    }
 
-    Map<String, Object> diff(String commit) {
-        def diff = [:]
+    GpDiff diff(String commit) {
+        GpDiff diff = new GpDiff()
         RevWalk revWalk = null
         try {
             revWalk = new RevWalk(repository);
             ObjectId objectId = repository.resolve(commit)
             RevCommit newCommit = revWalk.parseCommit(objectId)
 
-            diff.newId = newCommit.id.name()
+            diff.newCommit = new GpCommit(newCommit, false)
+            
             def reader = repository.newObjectReader()
+            
             CanonicalTreeParser newTreeParser = new CanonicalTreeParser()
             CanonicalTreeParser oldTreeParser = new CanonicalTreeParser()
             newTreeParser.reset(reader, newCommit.tree);
+            
             if (newCommit.getParentCount() > 0) {
-                diff.oldId = newCommit.getParent(0).getId().name()
                 RevCommit parentCommit = revWalk.parseCommit(newCommit.getParent(0).getId())
                 oldTreeParser.reset(reader, parentCommit.tree);
+                diff.oldCommit = new GpCommit(parentCommit, false)
+                
             } else {
-                diff.oldId = ObjectId.zeroId().name()
+//                diff.oldCommit = GpCommit.ZERO_COMMIT
             }
 
-            GpDiffFormatter diffFormatter = new GpDiffFormatter(new ByteArrayOutputStream())
-            diffFormatter.setRepository(repository)
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT)
-            diffFormatter.setDetectRenames(true)
+            GpDiffFormatter formatter = new GpDiffFormatter(new ByteArrayOutputStream())
+            formatter.setRepository(repository)
+            formatter.setDiffComparator(RawTextComparator.DEFAULT)
+            formatter.setDetectRenames(true)
 
-            List<DiffEntry> diffEntries = diffFormatter.scan(oldTreeParser, newTreeParser)
+            List<DiffEntry> diffEntries = formatter.scan(oldTreeParser, newTreeParser)
 
-            def diffs = []
             for (DiffEntry entry: diffEntries) {
-                diffFormatter.format(entry)
-                diffs << toMap(diffFormatter, entry)
-                diffFormatter.reset()
+                formatter.format(entry)
+                diff << new GpDiffEntry(formatter, entry)
+                formatter.reset()
             }
-            diff.diffs = diffs
-            diffFormatter.flush()
+            formatter.flush()
         } finally {
             release(revWalk)
         }
@@ -326,21 +323,21 @@ class GpRepository {
         entry.newMode = String.format("%o", diffEntry.getNewMode().bits)
         entry.oldMode = String.format("%o", diffEntry.getOldMode().bits)
         entry.diff = diffFormatter.diff()
-        entry.add = diffFormatter.add
-        entry.remove = diffFormatter.remove
+        entry.add = diffFormatter.addLine
+        entry.remove = diffFormatter.removeLine
         entry
     }
 
-    private release(TreeWalk treeWalk) {
-        if (treeWalk) {
-            treeWalk.release()
-        }
+    private void release(BlameGenerator generator) {
+        if (generator) { generator.release() }
     }
 
-    private release(RevWalk revWalk) {
-        if (revWalk) {
-            revWalk.release()
-        }
+    private void release(TreeWalk treeWalk) {
+        if (treeWalk) { treeWalk.release() }
+    }
+
+    private void release(RevWalk revWalk) {
+        if (revWalk) { revWalk.release() }
     }
 
 }

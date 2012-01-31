@@ -6,8 +6,8 @@ import org.eclipse.jgit.patch.FileHeader
 
 class GpDiffFormatter extends DiffFormatter {
 
-    int add = 0
-    int remove = 0
+    int addLine = 0
+    int removeLine = 0
     ByteArrayOutputStream out
 
     GpDiffFormatter(ByteArrayOutputStream out) {
@@ -24,18 +24,18 @@ class GpDiffFormatter extends DiffFormatter {
     @Override
     protected void writeAddedLine(RawText text, int line) {
         super.writeAddedLine(text, line)
-        add++
+        addLine++
     }
 
     @Override
     protected void writeRemovedLine(RawText text, int line) {
         super.writeRemovedLine(text, line)
-        remove++
+        removeLine++
     }
 
     void reset() {
-        add = 0
-        remove = 0
+        addLine = 0
+        removeLine = 0
         out.reset()
     }
 

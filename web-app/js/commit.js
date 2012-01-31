@@ -19,7 +19,7 @@
             });
         },
 
-        createChanges:function (add, remove) {
+        createChanges:function (addLine, removeLine) {
             function count(number, ch) {
                 var result = number / 5;
                 result = result > 10 ? 10 : result;
@@ -31,93 +31,93 @@
             }
 
             var $changes = $('<div>').addClass('changes');
-            $changes.append($('<span>').addClass('add').append(count(add, '+')));
-            $changes.append($('<span>').addClass('remove').append(count(remove, '-')));
-            $changes.attr('title', add + ' insertions(+), ' + remove + ' deletions(-)');
+            $changes.append($('<span>').addClass('add').append(count(addLine, '+')));
+            $changes.append($('<span>').addClass('remove').append(count(removeLine, '-')));
+            $changes.attr('title', addLine + ' insertions(+), ' + removeLine + ' deletions(-)');
             $changes.attr('ref', 'twipsy');
             $changes.twipsy();
             return $changes;
         },
 
-        renderCommitInFiles: function(diffs) {
+        renderCommitInFiles: function(entries) {
             var $table = $('<table>').addClass('condensed-table');
             var $tbody = $('<tbody>').appendTo($table);
             var sumAdd = 0;
             var sumRemove = 0;
 
-            for (var i = 0; i < diffs.length; i++) {
-                var diff = diffs[i];
+            for (var i = 0; i < entries.length; i++) {
+                var entry = entries[i];
                 var $tr = $('<tr>');
-                if (diff.type === 'ADD') {
+                if (entry.type === 'ADD') {
                     $('<td>').append($('<span class="label notice">ADD</span>')).appendTo($tr);
-                    $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.newPath)).appendTo($tr);
-                } else if (diff.type === 'MODIFY') {
+                    $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.newFile.path)).appendTo($tr);
+                } else if (entry.type === 'MODIFY') {
                     $('<td>').append($('<span class="label success">MODIFY</span>')).appendTo($tr);
-                    $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.newPath)).appendTo($tr);
-                } else if (diff.type === 'DELETE') {
+                    $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.newFile.path)).appendTo($tr);
+                } else if (entry.type === 'DELETE') {
                     $('<td>').append($('<span class="label important">DELETE</span>')).appendTo($tr);
-                    $('<td>').append($('<a>').attr('href', '#' + diff.oldId).text(diff.oldPath)).appendTo($tr);
-                } else if (diff.type === 'RENAME') {
+                    $('<td>').append($('<a>').attr('href', '#' + entry.oldFile.id).text(entry.oldFile.path)).appendTo($tr);
+                } else if (entry.type === 'RENAME') {
                     $('<td>').append($('<span class="label warning">RENAME</span>')).appendTo($tr);
-                    $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.oldPath + " -> " + diff.newPath)).appendTo($tr);
-                } else if (diff.type === 'COPY') {
+                    $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.oldFile.path + " -> " + entry.newFile.path)).appendTo($tr);
+                } else if (entry.type === 'COPY') {
                     $('<td>').append($('<span class="label">COPY</span>')).appendTo($tr);
-                    $('<td>').append($('<a>').attr('href', '#' + diff.newId).text(diff.oldPath + " -> " + diff.newPath)).appendTo($tr);
+                    $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.oldFile.path + " -> " + entry.newFile.path)).appendTo($tr);
                 }
-                $('<td>').append(this.createChanges(diff.add, diff.remove)).appendTo($tr);
-                sumAdd += diff.add;
-                sumRemove += diff.remove;
+                $('<td>').append(this.createChanges(entry.addLine, entry.removeLine)).appendTo($tr);
+                sumAdd += entry.add;
+                sumRemove += entry.remove;
 
                 $tr.appendTo($tbody);
             }
             this.target.append($table);
-            this.target.append($('<p>').text(diffs.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
+            this.target.append($('<p>').text(entries.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
         },
 
-        renderDiffs:function(diffs) {
+        renderDiffs:function(entries) {
             this.target.append($('<h3>').text('Diffs'));
-            for (var i = 0; i < diffs.length; i++) {
-                var diff = diffs[i];
+            for (var i = 0; i < entries.length; i++) {
+                var entry = entries[i];
                 var $diff = $('<div>').addClass('diff');
 
                 var $title = $('<div>').addClass('title');
                 var $path = $('<h4>').appendTo($title);
-                if (diff.type === 'ADD') {
-                    $path.attr('id', diff.newId);
+                if (entry.type === 'ADD') {
+                    $path.attr('id', entry.newFile.id);
                     $path.append('<span class="label notice">ADD</span>')
-                    $path.append($('<small>').text(diff.newMode));
-                    $path.append(diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
-                } else if (diff.type === 'MODIFY') {
-                    $path.attr('id', diff.newId);
+                    $path.append($('<small>').text(entry.newFile.mode));
+                    $path.append(entry.newFile.path);
+                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                } else if (entry.type === 'MODIFY') {
+                    $path.attr('id', entry.newFile.id);
                     $path.append('<span class="label success">MODIFY</span>');
-                    $path.append($('<small>').text(diff.newMode));
-                    $path.append(diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
-                } else if (diff.type === 'DELETE') {
-                    $path.attr('id', diff.oldId);
+                    $path.append($('<small>').text(entry.newFile.mode));
+                    $path.append(entry.newFile.path);
+                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                } else if (entry.type === 'DELETE') {
+                    $path.attr('id', entry.oldFile.id);
                     $path.append('<span class="label important">DELETE</span>');
-                    $path.append($('<small>').text(diff.oldMode));
-                    $path.append(diff.oldPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', diff.oldBlobUrl).text(diff.oldId.substr(0, 10)));
-                } else if (diff.type === 'RENAME') {
-                    $path.attr('id', diff.newId);
+                    $path.append($('<small>').text(entry.oldFile.mode));
+                    $path.append(entry.oldFile.path);
+                    $title.append($('<a>').addClass('pull-right').attr('href', entry.oldFile.blobUrl).text(entry.oldFile.id.substr(0, 10)));
+                } else if (entry.type === 'RENAME') {
+                    $path.attr('id', entry.newFile.id);
                     $path.append('<span class="label warning">RENAME</span>');
-                    $path.append($('<small>').text(diff.newMode));
-                    $path.append(diff.oldPath + " -> " + diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
-                } else if (diff.type === 'COPY') {
-                    $path.attr('id', diff.newId);
+                    $path.append($('<small>').text(entry.newFile.mode));
+                    $path.append(entry.oldFile.path + " -> " + entry.newFile.path);
+                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                } else if (entry.type === 'COPY') {
+                    $path.attr('id', entry.newFile.id);
                     $path.append('<span class="label">COPY</span>');
-                    $path.append($('<small>').text(diff.newMode));
-                    $path.append(diff.oldPath + " -> " + diff.newPath);
-                    $title.append($('<a>').addClass('pull-right').attr('href', diff.newBlobUrl).text(diff.newId.substr(0, 10)));
+                    $path.append($('<small>').text(entry.newFile.mode));
+                    $path.append(entry.oldFile.path + " -> " + entry.newFile.path);
+                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
                 }
                 $title.appendTo($diff);
 
                 var brush = new SyntaxHighlighter.brushes['Diff']();
                 brush.init({toolbar:false, gutter:false});
-                var html = brush.getHtml(diff.diff);
+                var html = brush.getHtml(entry.diff);
                 var $code = $(html);
                 $('.code div', $code).removeClass('container');
                 $('code.string', $code).each(
@@ -136,9 +136,9 @@
         },
 
         renderCommit:function (data) {
-            var diffs = data.diffs;
-            this.renderCommitInFiles(diffs);
-            this.renderDiffs(diffs);
+            var entries = data.entries;
+            this.renderCommitInFiles(entries);
+            this.renderDiffs(entries);
         }
 
     });
