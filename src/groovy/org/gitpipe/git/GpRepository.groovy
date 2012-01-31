@@ -231,6 +231,7 @@ class GpRepository {
             blame = new GpBlame(raw(ref, path))
             generator = new BlameGenerator(repository, path)
             generator.push("", repository.resolve(ref))
+            blame.size = generator.resultContents.size()
             while (generator.next()) {
                 blame << new GpBlameEntry(generator)
             }

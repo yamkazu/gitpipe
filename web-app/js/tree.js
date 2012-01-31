@@ -39,7 +39,7 @@
             that.renderNavPath(currnet, true);
         },
 
-        renderNavPath:function(pathInfo, current) {
+        renderNavPath:function (pathInfo, current) {
             var $path = $('<li>');
             var that = this;
             if (current) {
@@ -144,7 +144,6 @@
         },
 
 
-
         renderBlob:function (data) {
             this.content.append(this.renderBlobInfo(data));
 
@@ -169,15 +168,7 @@
         },
 
         renderBlame:function (data) {
-//            this.content.append(this.renderBlobInfo(data));
-
-//            if (data.file_type === 'binary') {
-//                this.content.append($('<div>').addClass('well').text('no viewer'));
-//                this.slideContent("show");
-//                this.renderNav(data.current, data.parents);
-//                return;
-//            }
-
+            this.content.append(this.renderBlameInfo(data));
             var brush = new SyntaxHighlighter.brushes[data.raw.type]();
 
             brush.init({toolbar:false});
@@ -187,20 +178,32 @@
             $('.code div', $code).removeClass('container');
 
             var $tr = $('tr', $code)
-            var $td = $('<td>').prependTo($tr);
+            var $td = $('<td>').addClass('blame').prependTo($tr);
 
             var entries = data.entries;
             var current = 0;
-            for (var i = 0;  i < entries.length; i++) {
+            for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
                 for (var j = 0; j < entry.length; j++) {
-                    $td.append($('<div>').text(entry.commit.id.substr(0, 10)));
+                    var $line = $('<div>').addClass('line').addClass('number' + (current + 1)).addClass('index' + current).appendTo($td);
+                    if (j == 0) {
+                        $line.append($('<time>').text(entry.commit.date));
+                        $line.append($('<a>').attr('href', entry.commit.url).text(entry.commit.id.substr(0, 10)));
+                        $line.append($('<span>').text('»'));
+                        if (entry.commit.author.username) {
+                            $line.append($('<a>').attr('href', entry.commit.author.url).text(entry.commit.author.username));
+                        } else {
+                            $line.append($('<span>').text(entry.commit.author.name));
+                        }
+                    } else {
+                        $line.text(' ');
+                    }
+                    current++;
+                }
+                if (data.size != current) {
+                    $('.number' + current, $code).addClass('separate');
                 }
             }
-//            for (var i = 0; i < 107; i++) {
-//                $td.append($('<div>aaa</div>'));
-//            }
-
             this.content.append($code);
             this.slideContent("show");
             this.renderNav(data.current, data.parents);
@@ -210,6 +213,16 @@
             var $info = $('<div>').addClass('blob-info');
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
+            var $actions = $('<div>').addClass('pull-right').appendTo($info);
+            $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
+            $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
+            return $info;
+        },
+
+        renderBlameInfo:function(data) {
+            var $info = $('<div>').addClass('blob-info');
+            $('<span>').text(data.raw.mode).appendTo($info);
+            $('<span>').text(data.raw.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
             $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));

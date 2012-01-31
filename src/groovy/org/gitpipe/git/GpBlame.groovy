@@ -2,6 +2,7 @@ package org.gitpipe.git
 
 class GpBlame {
 
+    int size
     GpRaw raw
 
     List<GpBlameEntry> entries = []

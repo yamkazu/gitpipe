@@ -3,6 +3,7 @@ import org.eclipse.jgit.lib.Constants
 import org.gitpipe.User
 import org.gitpipe.git.GpBlame
 import org.gitpipe.git.GpRepository
+import org.gitpipe.util.TimeUtils
 
 class RepositoryController extends AbstractController {
 
@@ -139,12 +140,20 @@ class RepositoryController extends AbstractController {
         }
     }
 
+    private User getUserByEmail(String email) {
+
+    }
+
     private Map<String, String> findUserByEmail(String email) {
         def author = User.findByEmail(email)
         if (!author) {
             return [:]
         }
         [username: author.username, userurl: createLink(mapping: 'user', params: [username: author.username])]
+    }
+
+    private String createUserLink(User user) {
+        createLink(mapping: 'user', params: [username: user.username]).toString()
     }
 
     def blame(String ref, String path) {
@@ -172,6 +181,7 @@ class RepositoryController extends AbstractController {
                         }
                     }
 
+                    size = blame.size
                     entries = array {
                         for (entry in blame.entries) {
                             e {
@@ -180,9 +190,15 @@ class RepositoryController extends AbstractController {
                                 length = entry.length
                                 commit {
                                     id = entry.commit.id
-                                    date = entry.commit.date
+                                    date = entry.commit.date.format("yyyy-MM-dd")
+                                    url = createCommitLink(entry.commit.id)
                                     author = {
                                         name = entry.commit.author.name
+                                        def u = User.findByEmail(entry.commit.author.email)
+                                        if (u) {
+                                            username = user.username
+                                            url = createUserLink(user)
+                                        }
                                     }
                                 }
                             }

@@ -29,7 +29,7 @@
     width: auto;
     box-sizing: content-box;
     /*font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;*/
-    font-family: 'Bitstream Vera Sans Mono','Courier',monospace;
+    font-family: 'Bitstream Vera Sans Mono', 'Courier', monospace;
     font-weight: normal;
     font-style: normal;
     font-size: 1em;
@@ -428,4 +428,20 @@
 .syntaxhighlighter .remove {
     background-color: #FFDDDD;
 }
+
+.syntaxhighlighter .separate {
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.syntaxhighlighter .blame {
+    border-right: 1px solid #DDDDDD;
+    background-color: #F8F8FF;
+}
+
+.syntaxhighlighter .blame div time,
+.syntaxhighlighter .blame div a,
+.syntaxhighlighter .blame div span {
+    padding: 0 3px;
+}
+
 
