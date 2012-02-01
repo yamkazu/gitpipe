@@ -1,6 +1,3 @@
-import org.gitpipe.User
-import grails.web.RequestParameter
-
 class UserController extends AbstractController {
 
     def beforeInterceptor = {

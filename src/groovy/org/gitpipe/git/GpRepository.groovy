@@ -13,14 +13,11 @@ import org.eclipse.jgit.treewalk.filter.PathFilter
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup
 import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
-import org.gitpipe.util.TimeUtils
 import org.eclipse.jgit.lib.*
 
 class GpRepository {
 
     private Repository repository;
-
-    static final OBJECT_TYPE_MAP = [(Constants.OBJ_TREE): Constants.TYPE_TREE, (Constants.OBJ_BLOB): Constants.TYPE_BLOB]
 
     GpRepository(File directory) {
         repository = RepositoryCache.open(RepositoryCache.FileKey.exact(directory, FS.DETECTED), false)
@@ -32,53 +29,19 @@ class GpRepository {
         }
     }
 
-    Map<String, String> getContent(String ref, String path) {
-//        InputStream stream = null
-        RevWalk revWalk = null
-        TreeWalk treeWalk = null
-
-        def content = [:]
-        try {
-            ObjectId objectId = repository.resolve(ref)
-
-            revWalk = new RevWalk(repository)
-            RevCommit revCommit = revWalk.parseCommit(objectId)
-
-            treeWalk = new TreeWalk(repository)
-            treeWalk.addTree(revCommit.tree)
-            treeWalk.setFilter(PathFilterGroup.createFromStrings(Collections.singleton(path)))
-
-            while (treeWalk.next()) {
-                if (treeWalk.isSubtree() && !path.equals(treeWalk.getPathString())) {
-                    treeWalk.enterSubtree();
-                    continue;
-                }
-                ObjectId blobId = treeWalk.getObjectId(0)
-                ObjectLoader objectLoader = repository.open(blobId, Constants.OBJ_BLOB)
-                content['mode'] = String.format("%o", treeWalk.getFileMode(0).bits)
-                content['size'] = objectLoader.size / 1000
-                content['data'] = objectLoader.bytes
-//                FIXME big file の扱い
-//                stream = objectLoader.openStream()
-//                IOUtils.toByteArray(stream)
-            }
-        } finally {
-//            IOUtils.closeQuietly(stream)
-            release(treeWalk)
-            release(revWalk)
-        }
-        content
-    }
-
     Map<String, Ref> getBranches() {
         repository.refDatabase.getRefs(Constants.R_HEADS)
+    }
+
+    String getDefaultBranch() {
+        return repository.branch
     }
 
     Map<String, Ref> getTags() {
         repository.refDatabase.getRefs(Constants.R_TAGS)
     }
 
-    List<Map<String, String>> findFilesInPath(String ref, String path) {
+    List<GpObject> findFilesInPath(String ref, String path) {
         ObjectId objectId = repository.resolve(ref)
         TreeWalk treeWalk = null
         RevWalk revWalk = null
@@ -97,7 +60,7 @@ class GpRepository {
             def foundFolder = false
             if (!path) {
                 while (treeWalk.next()) {
-                    files << toMap(treeWalk)
+                    files << new GpObject(treeWalk)
                 }
             } else {
                 while (treeWalk.next()) {
@@ -109,7 +72,7 @@ class GpRepository {
                         continue;
                     }
                     if (foundFolder) {
-                        files << toMap(treeWalk)
+                        files << new GpObject(treeWalk)
                     }
                 }
             }
@@ -120,43 +83,13 @@ class GpRepository {
         files
     }
 
-    Map<String, Object> getLastCommit(String ref, String path) {
-        if (!path) {
-            return getLastCommit(ref)
-        }
-
-        List result = getRevCommit(ref, path, 0, 1)
-        if (!result) {
-            return [:]
-        }
-
-        return result.get(0)
-    }
-
-    String getDefaultBranch() {
-        return repository.branch
-    }
-
-    Map<String, Object> getLastCommit(String ref = repository.branch) {
-        RevWalk revWalk = null;
-        try {
-            ObjectId objectId = repository.resolve(ref)
-            revWalk = new RevWalk(repository)
-            return toMap(revWalk.parseCommit(objectId))
-        } finally {
-            release(revWalk)
-        }
-    }
-
-    List<Map<String, Object>> getRevCommit(String ref, String path, int offset, int maxCount) {
+    List<GpCommit> log(String ref, String path, int offset, int maxCount) {
         def commits = []
-
         if (maxCount == 0 || !hasCommits()) {
             return commits
         }
 
         ObjectId objectId = repository.resolve(ref)
-
         RevWalk revWalk = null
         try {
             revWalk = new RevWalk(repository)
@@ -171,18 +104,18 @@ class GpRepository {
 
             if (offset > 0) {
                 int count = 0
-                for (RevCommit rev: revWalk) {
+                for (RevCommit commit: revWalk) {
                     count++
                     if (count > offset) {
-                        commits << toMap(rev)
+                        commits << new GpCommit(commit, false)
                         if (maxCount > 0 && commits.size() == maxCount) {
                             break
                         }
                     }
                 }
             } else {
-                for (RevCommit rev: revWalk) {
-                    commits << toMap(rev)
+                for (RevCommit commit: revWalk) {
+                    commits << new GpCommit(commit, false)
                     if (maxCount > 0 && commits.size() == maxCount) {
                         break
                     }
@@ -192,6 +125,30 @@ class GpRepository {
             release(revWalk)
         }
         commits
+    }
+
+    GpCommit logLimit1(String ref = repository.branch) {
+        RevWalk revWalk = null;
+        try {
+            ObjectId objectId = repository.resolve(ref)
+            revWalk = new RevWalk(repository)
+            return new GpCommit(revWalk.parseCommit(objectId), false)
+        } finally {
+            release(revWalk)
+        }
+    }
+
+    GpCommit logLimit1(String ref, String path) {
+        if (!path) {
+            return logLimit1(ref)
+        }
+
+        List result = log(ref, path, 0, 1)
+        if (!result) {
+            return null
+        }
+
+        return result.get(0)
     }
 
     GpRaw raw(String ref, String path) {
@@ -224,25 +181,6 @@ class GpRepository {
         raw
     }
 
-    GpBlame blame(String ref, String path) {
-        BlameGenerator generator = null
-        GpBlame blame = null
-        try {
-            blame = new GpBlame(raw(ref, path))
-            generator = new BlameGenerator(repository, path)
-            generator.push("", repository.resolve(ref))
-            blame.size = generator.resultContents.size()
-            while (generator.next()) {
-                blame << new GpBlameEntry(generator)
-            }
-            blame.sort()
-        } finally {
-            release(generator)
-        }
-        blame
-    }
-
-
     GpDiff diff(String commit) {
         GpDiff diff = new GpDiff()
         RevWalk revWalk = null
@@ -252,20 +190,18 @@ class GpRepository {
             RevCommit newCommit = revWalk.parseCommit(objectId)
 
             diff.newCommit = new GpCommit(newCommit, false)
-            
+
             def reader = repository.newObjectReader()
-            
+
             CanonicalTreeParser newTreeParser = new CanonicalTreeParser()
             CanonicalTreeParser oldTreeParser = new CanonicalTreeParser()
             newTreeParser.reset(reader, newCommit.tree);
-            
+
             if (newCommit.getParentCount() > 0) {
                 RevCommit parentCommit = revWalk.parseCommit(newCommit.getParent(0).getId())
                 oldTreeParser.reset(reader, parentCommit.tree);
                 diff.oldCommit = new GpCommit(parentCommit, false)
-                
-            } else {
-//                diff.oldCommit = GpCommit.ZERO_COMMIT
+
             }
 
             GpDiffFormatter formatter = new GpDiffFormatter(new ByteArrayOutputStream())
@@ -287,45 +223,29 @@ class GpRepository {
         return diff;
     }
 
+    GpBlame blame(String ref, String path) {
+        BlameGenerator generator = null
+        GpBlame blame = null
+        try {
+            blame = new GpBlame(raw(ref, path))
+            generator = new BlameGenerator(repository, path)
+            generator.push("", repository.resolve(ref))
+            blame.size = generator.resultContents.size()
+            while (generator.next()) {
+                blame << new GpBlameEntry(generator)
+            }
+            blame.sort()
+        } finally {
+            release(generator)
+        }
+        blame
+    }
+
     private boolean hasCommits() {
         if (repository != null && repository.getDirectory().exists()) {
             return (new File(repository.getDirectory(), "objects").list().length > 2) || (new File(repository.getDirectory(), "objects/pack").list().length > 0)
         }
         return false
-    }
-
-    private Map<String, Object> toMap(RevCommit revCommit) {
-        def map = [:]
-        if (!revCommit) {
-            return map
-        }
-
-        map.id = revCommit.id.name
-        map.author = revCommit.authorIdent.name
-        map.email = revCommit.authorIdent.emailAddress
-        map.date = TimeUtils.timeAgo(new Date(revCommit.commitTime * 1000L))
-        map.message = revCommit.shortMessage
-
-        return map
-    }
-
-    private Map<String, Object> toMap(TreeWalk treeWalk) {
-        [id: treeWalk.getObjectId(0).name, type: OBJECT_TYPE_MAP.get(treeWalk.getFileMode(0).objectType), path: treeWalk.pathString, name: treeWalk.nameString]
-    }
-
-    private Map<String, Object> toMap(GpDiffFormatter diffFormatter, DiffEntry diffEntry) {
-        def entry = [:]
-        entry.newId = diffEntry.newId?.name()
-        entry.oldId = diffEntry.oldId?.name()
-        entry.type = diffEntry.changeType.name()
-        entry.newPath = diffEntry.newPath
-        entry.oldPath = diffEntry.oldPath
-        entry.newMode = String.format("%o", diffEntry.getNewMode().bits)
-        entry.oldMode = String.format("%o", diffEntry.getOldMode().bits)
-        entry.diff = diffFormatter.diff()
-        entry.add = diffFormatter.addLine
-        entry.remove = diffFormatter.removeLine
-        entry
     }
 
     private void release(BlameGenerator generator) {

@@ -65,8 +65,8 @@
                     $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.oldFile.path + " -> " + entry.newFile.path)).appendTo($tr);
                 }
                 $('<td>').append(this.createChanges(entry.addLine, entry.removeLine)).appendTo($tr);
-                sumAdd += entry.add;
-                sumRemove += entry.remove;
+                sumAdd += entry.addLine;
+                sumRemove += entry.removeLine;
 
                 $tr.appendTo($tbody);
             }

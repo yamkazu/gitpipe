@@ -9,7 +9,7 @@
 <g:render template="/repository/header" model="[user: user, project: project]"/>
 <g:render template="/repository/tabs" model="[user: user, project: project, ref: ref, active: 'files']"/>
 <g:render template="/repository/current" model="[ref: ref]" />
-<g:render template="/repository/lastCommit" model="[user: user, project: project, ref: ref, commit: commit]" />
+<g:render template="/repository/lastCommit" model="[user: user, project: project, ref: ref, commit: commit, commitUser: commitUser]" />
 
 <div id="tree"></div>
 

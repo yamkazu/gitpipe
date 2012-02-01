@@ -1,7 +1,6 @@
 import grails.plugins.springsecurity.Secured
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
 import org.gitpipe.Project
 
 class ProjectController extends AbstractController {
@@ -18,7 +17,7 @@ class ProjectController extends AbstractController {
     @Secured(['ROLE_USER'])
     def create() {
         bindUser(springSecurityService.principal.username)
-        
+
         def project = new Project(params)
         project.user = user
         if (!project.save()) {
@@ -31,14 +30,14 @@ class ProjectController extends AbstractController {
 
         redirect(uri: createLink(mapping: 'project', params: [username: user.username, project: project.name]))
     }
-    
+
     def show() {
         bindUser()
         bindProject()
 
         def repository = project.repository
 
-        render view: '/repository/tree', model: [user: user, project: project, 'ref': repository.defaultBranch, path: '', commit: repository.getLastCommit()]
+        forward controller: 'repository', action: 'tree', params: [username: user.username, project: project.name, ref: repository.defaultBranch]
     }
 
 }

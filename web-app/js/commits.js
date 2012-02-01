@@ -32,13 +32,13 @@
                 $('<time>').text(commit.date).appendTo($commit);
 
                 var $meta = $('<div>').addClass('meta').appendTo($commit);
-                $('<p>').addClass('message').text(commit.message).appendTo($meta);
+                $('<p>').addClass('message').text(commit.shortMessage).appendTo($meta);
                 $('<br>').appendTo($meta);
 
-                if (commit.username) {
-                    $('<p>').addClass('author').append($('<a>').attr('href', commit.userurl).text(commit.username)).appendTo($meta);
+                if (commit.author.username) {
+                    $('<p>').addClass('author').append($('<a>').attr('href', commit.author.url).text(commit.author.username)).appendTo($meta);
                 } else {
-                    $('<p>').addClass('author').text(commit.author).appendTo($meta);
+                    $('<p>').addClass('author').text(commit.author.name).appendTo($meta);
                 }
                 $('<p>').addClass('pull-right id').append($('<a>').attr('href', commit.url).text(commit.id.substr(0, 10))).appendTo($meta);
 

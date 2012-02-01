@@ -323,10 +323,10 @@
                     });
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
-                var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.message)).appendTo($tr);
-                if (file.commit.username) {
+                var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
+                if (file.commit.author.username) {
                     message.append('&nbsp;')
-                    $('<a>').attr('href', file.commit.userurl).text('[' + file.commit.username + ']').appendTo(message);
+                    $('<a>').attr('href', file.commit.author.url).text('[' + file.commit.author.username + ']').appendTo(message);
                 }
                 $('<td>').appendTo($tr);
             })(current, file, $tr);
@@ -343,10 +343,10 @@
                     });
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
-                var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.message)).appendTo($tr);
-                if (file.commit.username) {
+                var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
+                if (file.commit.author.username) {
                     message.append('&nbsp;')
-                    $('<a>').attr('href', file.commit.userurl).text('[' + file.commit.username + ']').appendTo(message);
+                    $('<a>').attr('href', file.commit.author.url).text('[' + file.commit.author.username + ']').appendTo(message);
                 }
                 $('<td>').appendTo($tr);
             })(current, file, $tr);

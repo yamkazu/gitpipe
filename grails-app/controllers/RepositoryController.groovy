@@ -1,10 +1,10 @@
 import grails.web.RequestParameter
-import org.eclipse.jgit.diff.RawText
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.lib.ObjectId
 import org.gitpipe.User
 import org.gitpipe.git.GpBlame
 import org.gitpipe.git.GpDiff
+import org.gitpipe.git.GpRaw
 import org.gitpipe.git.GpRepository
 
 class RepositoryController extends AbstractController {
@@ -21,16 +21,28 @@ class RepositoryController extends AbstractController {
     def commits(String ref, String path, int page) {
         withFormat {
             html {
-                [user: user, project: project, 'ref': ref, path: path]
+                [user: user, project: project, ref: ref, path: path]
             }
             json {
                 render(contentType: "text/json") {
-                    def cs = repository.getRevCommit(ref, path, page * maxCommitsFetchSize(), maxCommitsFetchSize())
-                    commits = cs.collect { commit ->
-                        commit = commit + findUserByEmail(commit.email)
-                        commit.remove("email") // does not include email address in json response
-                        commit.url = createCommitLink(commit.id)
-                        commit
+                    def cs = repository.log(ref, path, page * maxCommitsFetchSize(), maxCommitsFetchSize())
+                    commits = array {
+                        for (commit in cs) {
+                            c {
+                                id = commit.id
+                                date = commit.date.format("yyyy-MM-dd HH:mm:sss")
+                                url = createCommitLink(commit.id)
+                                shortMessage = commit.message
+                                author = {
+                                    name = commit.author.name
+                                    def u = User.findByEmail(commit.author.email)
+                                    if (u) {
+                                        username = user.username
+                                        url = createUserLink(user)
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (!(cs.size() < maxCommitsFetchSize())) {
                         next = createCommitsLink(ref, path, ++page)
@@ -40,23 +52,18 @@ class RepositoryController extends AbstractController {
         }
     }
 
-    private String createCommitsLink(String ref, String path, Integer page = null) {
-        def params = [username: user.username, project: project.name, ref: ref, path: path]
-        if (page) {
-            params.page = page
-        }
-        createLink(mapping: 'repository_commits', params: params).toString()
-    }
-
-    private int maxCommitsFetchSize() {
-        grailsApplication.config.gitpipe.commits.max.fetch.size
-    }
-
     def commit(@RequestParameter('id') String commitId) {
         withFormat {
             html {
-                def commit = repository.getLastCommit(commitId)
-                [user: user, project: project, id: commitId, commit: commit + findUserByEmail(commit.email)]
+                def commit = repository.logLimit1(commitId)
+                def map = [user: user, project: project, id: commitId, commit: commit]
+
+                def commitUser = User.findByEmail(commit.author.email)
+                if (commitUser) {
+                    map.commitUser = commitUser
+                }
+
+                map
             }
             json {
                 render(contentType: "text/json") {
@@ -93,38 +100,146 @@ class RepositoryController extends AbstractController {
         }
     }
 
-    private String createBlobLink(String ref, String path) {
-        createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path])
-    }
 
-    private String createRawLink(String ref, String path) {
-        createLink(mapping: 'repository_raw', params: [username: user.username, project: project.name, ref: ref, path: path])
-    }
-
-    def tree(String ref, String path) {
+    def tree(String ref, @RequestParameter('path') String treePath) {
         withFormat {
             html {
-                def commit = repository.getLastCommit(ref)
-                [user: user, project: project, ref: ref, path: path, commit: commit + findUserByEmail(commit.email)]
+                def commit = repository.logLimit1(ref)
+                def map = [user: user, project: project, ref: ref, path: treePath, commit: commit]
+                def commitUser = User.findByEmail(commit.author.email)
+                if (commitUser) {
+                    map.commitUser = commitUser
+                }
+                map
             }
             json {
                 render(contentType: "text/json") {
-                    current = createCurrentTreeLink(ref, path)
-                    historyUrl = createCommitsLink(ref, path)
-                    if (path) {
-                        parents = createParentsTreeLink(ref, path)
+                    current = createCurrentTreeLink(ref, treePath)
+                    historyUrl = createCommitsLink(ref, treePath)
+                    if (treePath) {
+                        parents = createParentsTreeLink(ref, treePath)
                     }
-                    files = repository.findFilesInPath(ref, path).collect { file ->
-                        file.commit = repository.getLastCommit(params.ref, file.path)
-                        file.commit = file.commit + findUserByEmail(file.commit.email)
-                        file.commit.remove("email") // does not include email address in json response
-                        file.commit.url = createCommitLink(file.commit.id)
-                        file.url = createTreeLink(file.type, ref, file.path)
-                        file
+                    files = array {
+                        for (file in repository.findFilesInPath(ref, treePath)) {
+                            f = {
+                                id = file.id
+                                name = file.name
+                                type = file.type
+                                path = file.path
+                                url = createTreeLink(file.type, ref, file.path)
+                                commit = {
+                                    def commit = repository.logLimit1(ref, file.path)
+                                    id = commit.id
+                                    date = commit.date.format("yyyy-MM-dd HH:mm:sss")
+                                    url = createCommitLink(commit.id)
+                                    shortMessage = commit.message
+                                    author = {
+                                        name = commit.author.name
+                                        def u = User.findByEmail(commit.author.email)
+                                        if (u) {
+                                            username = user.username
+                                            url = createUserLink(user)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    def blob(String ref, String path) {
+        withFormat {
+            html {
+                [user: user, project: project, ref: ref, path: path, commit: repository.logLimit1(ref)]
+            }
+            json {
+                // FIXME BIG DATA 対応
+                // 取得最大値を設ける
+                def blob = repository.raw(ref, path)
+                render(contentType: "text/json") {
+                    current = createCurrentBlobLink(ref, path)
+                    parents = createParentsTreeLink(ref, path)
+                    historyUrl = createCommitsLink(ref, path)
+                    rawUrl = createRawLink(ref, path)
+                    mode = blob.mode
+                    size = blob.size
+                    if (blob.isBinary()) {
+                        file_type = 'binary'
+                    } else {
+                        file_type = getViewerType(toFileName(path))
+                        data = blob.getFileAsString(Constants.CHARSET)
+                    }
+                }
+            }
+        }
+    }
+
+    def blame(String ref, String path) {
+        withFormat {
+            html {
+                [user: user, project: project, ref: ref, path: path, commit: repository.logLimit1(ref)]
+            }
+            json {
+                render(contentType: "text/json") {
+                    GpBlame blame = repository.blame(ref, path)
+
+                    current = createCurrentBlobLink(ref, path)
+                    parents = createParentsTreeLink(ref, path)
+                    historyUrl = createCommitsLink(ref, path)
+                    rawUrl = createRawLink(ref, path)
+
+                    raw = {
+                        mode = blame.raw.mode
+                        size = blame.raw.size
+                        if (blame.raw.isBinary()) {
+                            type = 'binary'
+                        } else {
+                            type = getViewerType(toFileName(path))
+                            file = blame.raw.getFileAsString()
+                        }
+                    }
+
+                    size = blame.size
+                    entries = array {
+                        for (entry in blame.entries) {
+                            e = {
+                                start = entry.start
+                                end = entry.end
+                                length = entry.length
+                                commit {
+                                    id = entry.commit.id
+                                    date = entry.commit.date.format("yyyy-MM-dd")
+                                    url = createCommitLink(entry.commit.id)
+                                    author = {
+                                        name = entry.commit.author.name
+                                        def u = User.findByEmail(entry.commit.author.email)
+                                        if (u) {
+                                            username = user.username
+                                            url = createUserLink(user)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    def raw(String ref, String path) {
+        def raw = repository.raw(ref, path)
+
+//        if (!raw.) {
+//            // handle not found
+//        }
+
+        response.setContentType(getMimeType(raw))
+        response.setHeader("Content-disposition", "filename=${toFileName(path)}")
+        response.outputStream << raw.file
     }
 
     private Map<String, String> createCurrentTreeLink(String ref, String path) {
@@ -151,6 +266,13 @@ class RepositoryController extends AbstractController {
         parents.reverse()
     }
 
+    private String createBlobLink(String ref, String path) {
+        createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
+    }
+
+    private String createRawLink(String ref, String path) {
+        createLink(mapping: 'repository_raw', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
+    }
 
     private String createCommitLink(String commit) {
         createLink(mapping: 'repository_commit', params: [username: user.username, project: project.name, id: commit]).toString()
@@ -164,119 +286,26 @@ class RepositoryController extends AbstractController {
         }
     }
 
-    private User getUserByEmail(String email) {
-
-    }
-
-    private Map<String, String> findUserByEmail(String email) {
-        def author = User.findByEmail(email)
-        if (!author) {
-            return [:]
-        }
-        [username: author.username, userurl: createLink(mapping: 'user', params: [username: author.username])]
-    }
-
     private String createUserLink(User user) {
         createLink(mapping: 'user', params: [username: user.username]).toString()
     }
 
-    def blame(String ref, String path) {
-        withFormat {
-            html {
-                [user: user, project: project, ref: ref, path: path, commit: repository.getLastCommit(ref)]
-            }
-            json {
-                render(contentType: "text/json") {
-                    GpBlame blame = repository.blame(ref, path)
-
-                    current = createCurrentBlobLink(ref, path)
-                    parents = createParentsTreeLink(ref, path)
-                    historyUrl = createCommitsLink(ref, path)
-                    rawUrl = createRawLink(ref, path)
-
-                    raw {
-                        mode = blame.raw.mode
-                        size = blame.raw.size
-                        if (blame.raw.isBinary()) {
-                            type = 'binary'
-                        } else {
-                            type = getViewerType(toFileName(path))
-                            file = blame.raw.getFileAsString()
-                        }
-                    }
-
-                    size = blame.size
-                    entries = array {
-                        for (entry in blame.entries) {
-                            e {
-                                start = entry.start
-                                end = entry.end
-                                length = entry.length
-                                commit {
-                                    id = entry.commit.id
-                                    date = entry.commit.date.format("yyyy-MM-dd")
-                                    url = createCommitLink(entry.commit.id)
-                                    author = {
-                                        name = entry.commit.author.name
-                                        def u = User.findByEmail(entry.commit.author.email)
-                                        if (u) {
-                                            username = user.username
-                                            url = createUserLink(user)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    private String createCommitsLink(String ref, String path, Integer page = null) {
+        def params = [username: user.username, project: project.name, ref: ref, path: path]
+        if (page) {
+            params.page = page
         }
+        createLink(mapping: 'repository_commits', params: params).toString()
     }
 
-    def blob(String ref, String path) {
-        withFormat {
-            html {
-                [user: user, project: project, ref: ref, path: path, commit: repository.getLastCommit(ref)]
-            }
-            json {
-                // FIXME BIG DATA 対応
-                // 取得最大値を設ける
-                def content = repository.getContent(ref, path)
-
-                render(contentType: "text/json") {
-                    current = createCurrentBlobLink(ref, path)
-                    parents = createParentsTreeLink(ref, path)
-                    historyUrl = createCommitsLink(ref, path)
-                    rawUrl = createRawLink(ref, path)
-                    mode = content.mode
-                    size = content.size
-
-                    if (RawText.isBinary(content.data)) {
-                        file_type = 'binary'
-                    } else {
-                        file_type = getViewerType(toFileName(path))
-                        data = new String(content.data, Constants.CHARSET)
-                    }
-                }
-            }
-        }
+    private int maxCommitsFetchSize() {
+        grailsApplication.config.gitpipe.commits.max.fetch.size
     }
 
-    def raw(String ref, String path) {
-        def content = repository.getContent(ref, path)
 
-        if (!content.data) {
-            // handle not found
-        }
-
-        response.setContentType(getMimeType(content.data as byte[]))
-        response.setHeader("Content-disposition", "filename=${toFileName(path)}")
-        response.outputStream << content.data
-    }
-
-    private String getMimeType(byte[] data) {
+    private String getMimeType(GpRaw raw) {
         // TODO 真面目にやるなら拡張子で色々判断しないとな
-        RawText.isBinary(data) ? "application/octet-stream" : "text/plain"
+        raw.isBinary() ? "application/octet-stream" : "text/plain"
     }
 
     private String toFileName(String path) {
