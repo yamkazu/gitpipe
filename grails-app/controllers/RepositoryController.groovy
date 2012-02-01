@@ -62,7 +62,6 @@ class RepositoryController extends AbstractController {
                 if (commitUser) {
                     map.commitUser = commitUser
                 }
-
                 map
             }
             json {
@@ -164,8 +163,8 @@ class RepositoryController extends AbstractController {
             json {
                 // FIXME BIG DATA 対応
                 // 取得最大値を設ける
-                def blob = repository.raw(ref, path)
                 render(contentType: "text/json") {
+                    def blob = repository.raw(ref, path)
                     current = createCurrentBlobLink(ref, path)
                     parents = createParentsTreeLink(ref, path)
                     historyUrl = createCommitsLink(ref, path)
