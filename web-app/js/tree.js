@@ -215,16 +215,18 @@
             $('<span>').text(data.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
             $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
+            $actions.append($('<a>').attr('href', data.blameUrl).text('blame'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
             return $info;
         },
 
-        renderBlameInfo:function(data) {
+        renderBlameInfo:function (data) {
             var $info = $('<div>').addClass('blob-info');
             $('<span>').text(data.raw.mode).appendTo($info);
             $('<span>').text(data.raw.size + ' kb').appendTo($info);
             var $actions = $('<div>').addClass('pull-right').appendTo($info);
             $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
+            $actions.append($('<a>').attr('href', data.current.url).text('normal view'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
             return $info;
         },

@@ -153,7 +153,13 @@ class RepositoryController extends AbstractController {
     def blob(String ref, String path) {
         withFormat {
             html {
-                [user: user, project: project, ref: ref, path: path, commit: repository.logLimit1(ref)]
+                def commit = repository.logLimit1(ref)
+                def map = [user: user, project: project, ref: ref, path: path, commit: commit]
+                def commitUser = User.findByEmail(commit.author.email)
+                if (commitUser) {
+                    map.commitUser = commitUser
+                }
+                map
             }
             json {
                 // FIXME BIG DATA 対応
@@ -163,6 +169,7 @@ class RepositoryController extends AbstractController {
                     current = createCurrentBlobLink(ref, path)
                     parents = createParentsTreeLink(ref, path)
                     historyUrl = createCommitsLink(ref, path)
+                    blameUrl = createBlameLink(ref, path)
                     rawUrl = createRawLink(ref, path)
                     mode = blob.mode
                     size = blob.size
@@ -180,7 +187,13 @@ class RepositoryController extends AbstractController {
     def blame(String ref, String path) {
         withFormat {
             html {
-                [user: user, project: project, ref: ref, path: path, commit: repository.logLimit1(ref)]
+                def commit = repository.logLimit1(ref)
+                def map = [user: user, project: project, ref: ref, path: path, commit: commit]
+                def commitUser = User.findByEmail(commit.author.email)
+                if (commitUser) {
+                    map.commitUser = commitUser
+                }
+                map
             }
             json {
                 render(contentType: "text/json") {
@@ -268,6 +281,10 @@ class RepositoryController extends AbstractController {
 
     private String createBlobLink(String ref, String path) {
         createLink(mapping: 'repository_blob', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
+    }
+
+    private String createBlameLink(String ref, String path) {
+        createLink(mapping: 'repository_blame', params: [username: user.username, project: project.name, ref: ref, path: path]).toString()
     }
 
     private String createRawLink(String ref, String path) {
