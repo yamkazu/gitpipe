@@ -6,87 +6,78 @@
 </head>
 
 <body>
-<section>
-    <h1 class="username">${user.username}&nbsp;<small>(${user.name})</small>
+<div class="user row">
+    <div class="span9">
+        <h1 class="username">${user.username}&nbsp;<em>(${user.name})</em></h1>
+    </div>
+
+    <div class="span3 acctions">
         <g:if test="${sec.username() == user.username}">
             <span class="label">This is you!</span>
+            <g:link controller="account" class="btn small">Edit Profile</g:link>
         </g:if>
-    </h1>
-</section>
+    </div>
+</div>
 
 <hr/>
 
-<section>
-    <div class="row">
-        <div class="span3">
-            <h4>Name</h4>
-
-            <p>${user.name}</p>
-        </div>
-
-        <div class="span3">
-            <h4>Email</h4>
-
-            <p>${user.email}</p>
-        </div>
-
-        <div class="span3">
-            <h4>Company</h4>
-
-            <p>${user.company}</p>
-        </div>
-
-        <div class="span3">
-            <h4>Location</h4>
-
-            <p>${user.location}</p>
-        </div>
-
-        <div class="span3">
-            <h4>Member Since</h4>
-
-            <p><g:formatDate format="MMM dd, yyyy" date="${user.createDate}" locale="en"/></p>
-        </div>
+<div class="row">
+    <div class="span5 first vcard">
+        <dl>
+            <dt>Name</dt>
+            <dd>${user.name}</dd>
+        </dl>
+        <dl>
+            <dt>EMail</dt>
+            <dd>${user.email}</dd>
+        </dl>
+        <dl>
+            <dt>Company</dt>
+            <dd>${user.company}</dd>
+        </dl>
+        <dl>
+            <dt>Location</dt>
+            <dd>${user.location}</dd>
+        </dl>
+        <dl>
+            <dt>Member Since</dt>
+            <dd><g:formatDate format="MMM dd, yyyy" date="${user.createDate}" locale="en"/></dd>
+        </dl>
     </div>
-    <g:if test="${sec.username() == user.username}">
-        <g:link controller="account" class="btn small">Edit Profile</g:link>
-    </g:if>
-</section>
+</div>
 
 <hr>
 
-<section>
-    <div class="row">
-        <div class="span8">
-            <div>
-                <h2 class="">Repositories</h2>
+<div class="row repositories">
+    <div class="span6">
+        <div>
+            <h2>Repositories
+            <g:if test="${sec.username() == user.username}">
+                <g:link controller="project" class="pull-right btn">New Repository</g:link>
+            </g:if>
+            </h2>
+        </div>
 
-                <g:if test="${sec.username() == user.username}">
-                    <g:link controller="project" class="btn small">New Repository</g:link>
-                </g:if>
-            </div>
-
-            <g:each in="${repositories}" var="repository">
-                <div class="repository-box">
-                    <div class="repository-header">
-                        <a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.name])}">${repository.name}</a>
-                    </div>
-
-                    <div class="repository-body">
-                        <span>${repository.description}</span>
-                    </div>
+        <g:each in="${repositories}" var="repository">
+            <div class="repository">
+                <div class="repository-title">
+                    <h3><a href="${createLink(mapping: 'project', params: [username: user.username, project: repository.name])}">${repository.name}</a></h3>
                 </div>
-            </g:each>
 
-        </div>
+                <div class="repository-meta">
+                    <span>${repository.description}</span>
+                </div>
+            </div>
+        </g:each>
 
-        <div class="span6">
-            <h2>Public Activity</h2>
-
-            <p>xxx</p>
-        </div>
     </div>
-</section>
+
+    <div class="span6">
+        <h2>Public Activity</h2>
+
+        <p>xxx</p>
+    </div>
+</div>
 </body>
 
 </html>

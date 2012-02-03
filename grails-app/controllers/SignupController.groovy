@@ -15,9 +15,14 @@ class SignupController {
             return
         }
 
-        def user = new User(username: command.username, password: command.password, email: command.email, enabled: true, createDate: new Date())
+        def user = new User(params)
+        user.createDate = new Date()
+        user.enabled
 
-        if (!user.save(flush: true)) {
+        if (!user.save()){
+            user.errors.allErrors.each {
+                println it
+            }
             render view: 'form', model: [user: user]
             return
         }
@@ -25,7 +30,7 @@ class SignupController {
         def role = Role.findByAuthority('ROLE_USER')
         UserRole.create user, role, true
 
-        redirect action: created
+        redirect action: 'created'
     }
 
     def created() {

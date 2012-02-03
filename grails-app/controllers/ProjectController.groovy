@@ -17,7 +17,6 @@ class ProjectController extends AbstractController {
     @Secured(['ROLE_USER'])
     def create() {
         bindUser(springSecurityService.principal.username)
-
         def project = new Project(params)
         project.user = user
         if (!project.save()) {
@@ -28,7 +27,7 @@ class ProjectController extends AbstractController {
         // change before insert process
         project.repository.create()
 
-        redirect(uri: createLink(mapping: 'project', params: [username: user.username, project: project.name]))
+        redirect(mapping: 'project', params: [username: user.username, project: project.name])
     }
 
     def show() {

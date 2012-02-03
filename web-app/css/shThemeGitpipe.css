@@ -38,15 +38,15 @@
 
 .syntaxhighlighter {
     width: 100%;
-    margin: 0.5em 0 0.5em 0;
+    margin: 0;
     position: relative;
     overflow: auto;
     font-size: 1em;
-    border: 1px #DDDDDD solid;
-    border-collapse: separate;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
+    /*border: 1px #DDDDDD solid;*/
+    /*border-collapse: separate;*/
+    /*-webkit-border-radius: 3px;*/
+    /*-moz-border-radius: 3px;*/
+    /*border-radius: 3px;*/
 }
 
 .syntaxhighlighter.source {
@@ -72,23 +72,26 @@
     /*-webkit-border-radius: 3px;*/
     /*-moz-border-radius: 3px;*/
     /*border-radius: 3px;*/
+    border-bottom: 1px solid #D8D8D8;
+    border-right: 1px solid #D8D8D8;
+    border-left: 1px solid #D8D8D8;
 }
 
-.syntaxhighlighter table thead tr:first-child th:first-child, .syntaxhighlighter table tbody tr:first-child td:first-child {
-    border-radius: 4px 0 0 0;
-}
+/*.syntaxhighlighter table thead tr:first-child th:first-child, .syntaxhighlighter table tbody tr:first-child td:first-child {*/
+/*border-radius: 4px 0 0 0;*/
+/*}*/
 
-.syntaxhighlighter table thead tr:first-child th:last-child, .syntaxhighlighter table tbody tr:first-child td:last-child {
-    border-radius: 0 4px 0 0;
-}
+/*.syntaxhighlighter table thead tr:first-child th:last-child, .syntaxhighlighter table tbody tr:first-child td:last-child {*/
+/*border-radius: 0 4px 0 0;*/
+/*}*/
 
-.syntaxhighlighter table tr:last-child td:first-child {
-    border-radius: 0 0 0 4px;
-}
+/*.syntaxhighlighter table tr:last-child td:first-child {*/
+/*border-radius: 0 0 0 4px;*/
+/*}*/
 
-.syntaxhighlighter table tbody tr:last-child td:last-child {
-    border-radius: 0 0 4px 0;
-}
+/*.syntaxhighlighter table tbody tr:last-child td:last-child {*/
+/*border-radius: 0 0 4px 0;*/
+/*}*/
 
 .syntaxhighlighter table caption {
     text-align: left;
@@ -284,7 +287,7 @@
 }
 
 .syntaxhighlighter .gutter {
-    background-color: #F9F9F9;
+    background-color: #ECECEC;
 }
 
 .syntaxhighlighter .line.highlighted.alt1, .syntaxhighlighter .line.highlighted.alt2 {

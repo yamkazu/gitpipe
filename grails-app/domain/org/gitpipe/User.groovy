@@ -23,6 +23,9 @@ class User {
 //  のバグが治ったらcommand分離を辞める
     static constraints = {
         username unique: true
+        name nullable: true
+        company nullable: true
+        location nullable: true
     }
 
     static mapping = {

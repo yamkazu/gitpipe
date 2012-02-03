@@ -1,146 +1,414 @@
+/*
+ Override bootstrap
+*/
 body {
     padding-top: 60px;
 }
 
-.topbar div > ul {
-    float: right;
+a {
+    color: #000000;
 }
 
-.repository-box {
-    margin: 20px 0;
+h1 {
+    margin-bottom: 20px;
+}
+.navbar-inner {
+    background-color: transparent;
+    background-image: -moz-linear-gradient(top, #00A0D1, #00A0D1);
+    background-image: -ms-linear-gradient(top, #00A0D1, #00A0D1);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#00A0D1,), to(#00A0D1));
+    background-image: -webkit-linear-gradient(top, #00A0D1, #00A0D1);
+    background-image: -o-linear-gradient(top, #00A0D1, #00A0D1);
+    background-image: linear-gradient(top, #00A0D1, #00A0D1);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#00A0D1', endColorstr = '#00A0D1', GradientType = 0);
 }
 
-.repository-header {
-    border: 1px solid #EEEEEE;
-    padding: 5px 15px;
-    background-color: #F5F5F5;
-    border-radius: 6px 6px 0 0;
-    box-shadow: 0 1px 0 #FFFFFF inset;
-    margin-bottom: 0;
-}
-
-.repository-body {
-    border: 1px solid #EEEEEE;
-    padding: 10px 15px;
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 1px 0 #FFFFFF inset;
-    margin-bottom: 0;
-}
-
-.bordered-table th {
-    background-color: #f5f5f5;
-}
-
-.bordered-table td {
-    background-color: #F9F9F9;
-}
-
-.bordered-table th + th, .bordered-table td + td, .bordered-table th + td {
-    border-left-style: none;
-}
-
-.blob-info {
-    padding: 0 5px 0 0;
-}
-
-.blob-info span {
-    padding: 0 10px;
-}
-
-.blob-info a {
-    padding-left: 10px;
-}
-
-.blob-info span:nth-child(n+2) {
-    border-left: 1px #DDDDDD solid;
-}
-
-.commit {
-    margin: 0 0 20px 0;
-    border-radius: 4px;
-    /* box-shadow: 0 1px 0 #FFFFFF inset;*/
-    border: 1px solid #DDDDDD;
-}
-
-.commit time {
-    font-size: 90%;
-    background-color: #e6f1f6;
-    line-height: 30px;
-    padding-left: 10px;
-    display: block;
-}
-
-.commit .meta {
-    padding: 5px;
-}
-
-.commit .meta p {
-    display: inline;
-}
-
-.commit .meta .message {
+.navbar .brand {
     font-weight: bold;
-    font-size: 14px;
+    color: #FFFFFF;
 }
 
-.commit .meta .author {
-    font-size: 90%;
+.navbar .navbar-text a {
+    font-weight: bold;
+    color: #BFE4EF;
+    margin-left: 10px;
 }
 
-.label {
-    text-transform: none;
+.navbar .navbar-text a:hover {
+    font-weight: bold;
+    color: #4183C4;
+    background-color: transparent;
 }
 
-span.large {
-    font-size: 80%;
+/* footer */
+footer {
+    margin-top: 50px;
+    padding: 20px 0 200px 0;
+    background-color: #F8F8F8;
 }
 
-#commit table {
-    border-bottom: 1px solid #DDDDDD;
+footer p {
+    color: #999999;
+    text-align: right;
 }
 
-.changes {
-    display: inline;
+/* code */
+code {
+    color: #000000;
 }
 
-.changes .add {
-    color: #46A546;
+/*
+ Gitpipe Styles
+*/
+
+/* commons */
+.acctions {
+    text-align: right;
+}
+
+/* page head */
+.pagehead h1 {
+    font-size: 25px;
+}
+
+.pagehead h1 a {
+    font-weight: normal;
+    color: #4183C4;
+}
+
+.pagehead h1 strong a {
     font-weight: bold;
 }
 
-.changes .remove {
-    color: #C43C35;
-    font-weight: bold;
-}
-
-.diff {
+.pagehead {
     margin-bottom: 20px;
 }
 
-.diff h4 {
-    /* 内部リンクがずれための回避策 */
-    padding-top:40px;
-    margin-top:-40px;
-    font-family: 16px;
-    line-height: 20px;
+/* subnav-bar */
+.subnav-bar .current {
+    margin-top: 5px;
+    margin-right: 5px;
+    font-size: 12px;
+    display: block;
+}
+
+/* last commit */
+p.last-commit {
+    color: #888888;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+/* commit */
+.commit {
+    border-radius: 4px;
+    border: 1px solid #C5D5DD;
+    margin-bottom: 10px;
+}
+
+.commit .commit-title {
+    background-color: #E6F1F6;
+    padding: 7px 5px;
+    font-size: 12px;
+    border-bottom: 1px solid #C5D5DD;
+}
+
+.commit .commit-meta {
+    color: #888888;
+    padding: 5px 5px;
+    font-size: 12px;
+}
+
+.commit .commit-meta .author {
+    font-weight: bold;
+}
+
+.commit .sha-block {
+    color: #888888;
+}
+
+.commit .sha {
+    color: #000000;
+    font-family: Monaco, "Courier New", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+    font-size: 11px;
+}
+
+/* tree slider */
+#slider {
+    margin-top: 20px;
+}
+
+#slider .breadcrumb {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 5px;
+    font-size: 20px;
+}
+
+#slider .breadcrumb a {
+    color: #4183C4;
+    font-weight: bold;
+}
+
+/* tree browser */
+.bubble {
+    background-color: #EEEEEE;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.bubble .blob-info {
+    border: 1px solid #D8D8D8;
+    line-height: 40px;
+}
+
+table.tree-browser {
+    width: 100%;
+    border: 1px solid #D8D8D8;
+}
+
+table.tree-browser thead, .bubble .blob-info {
+    background-color: transparent;
+    background-image: -moz-linear-gradient(top, #FAFAFA, #EAEAEA);
+    background-image: -ms-linear-gradient(top, #FAFAFA, #EAEAEA);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FAFAFA,), to(#EAEAEA));
+    background-image: -webkit-linear-gradient(top, #FAFAFA, #EAEAEA);
+    background-image: -o-linear-gradient(top, #FAFAFA, #EAEAEA);
+    background-image: linear-gradient(top, #FAFAFA, #EAEAEA);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#FAFAFA', endColorstr = '#EAEAEA', GradientType = 0);
+}
+
+.bubble .blob-info .icon-txt {
+    background: #F7F7F7 url("../images/txt.png") no-repeat center;
+    margin-left: 7px;
+    margin-top: -3px;
+    margin-right: 5px;
+    width: 16px;
+    height: 16px;
+    padding: 3px;
+    border-radius: 3px;
+    border: 1px solid #CCCCCC;
+}
+
+.bubble .blob-info span {
+    color: #555555;
+    font-size: 12px;
+    text-align: left;
+    text-shadow: 0 1px 0 #FFFFFF;
+    padding: 0 5px;
+}
+
+.bubble .blob-info span:nth-child(n+3) {
+    border-left: 1px #DDDDDD solid;
+}
+
+.bubble .blob-info .actions a {
+    padding: 0 7px;
+    color: #4183C4;
+    text-shadow: 0 1px 0 #FFFFFF;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.bubble .blob-info .actions a:nth-child(n+2) {
+    border-left: 1px #DDDDDD solid;
+}
+
+table.tree-browser thead tr th {
+    line-height: 2.2;
+    text-align: left;
+    border-bottom: 1px solid #D8D8D8;
+}
+
+table.tree-browser tbody tr td {
+    line-height: 2.2;
+    text-align: left;
+    background-color: #F8F8F8;
+    border-bottom: 1px solid #D8D8D8;
+}
+
+table.tree-browser .content a, table.tree-browser .author {
+    color: #4183C4;
+}
+
+table.tree-browser .icon {
+    width: 17px;
+    padding: 0 5px 0 5px;
+}
+
+table.tree-browser .icon .icon-dir {
+    background: url("../images/dir.png") no-repeat;
+    margin-left: 7px;
+    width: 16px;
+    height: 16px;
+
+}
+
+table.tree-browser .icon .icon-txt {
+    background: url("../images/txt.png") no-repeat;
+    margin-left: 7px;
+    width: 16px;
+    height: 16px;
+}
+
+table.tree-browser .history {
+    padding-right: 10px;
+    color: #4183C4;
+}
+
+/**
+ Commit Page
+**/
+.toc {
+    width: 100%;
+    line-height: 1.4;
+    font-size: 14px;
+    border-top: 1px solid #DDDDDD;
+}
+
+.toc .changes {
     display: inline;
 }
 
-.diff .title a {
-    padding-top: 4px;
-}
-
-.diff h4 span.label {
-    margin-right: 3px;
-    vertical-align: middle;
-}
-
-.diff h4 small {
-    margin-right: 3px;
+.toc .changes .add {
     font-weight: bold;
+    color: #468847;
+}
+
+.toc .changes .remove {
+    font-weight: bold;
+    color: #B94A48;
+}
+
+.toc a {
+    color: #4183C4;
+}
+
+.toc td {
+    padding: 5px 0;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.toc td span {
     vertical-align: middle;
 }
 
-.breadcrumb {
-    background-image: none;
+/*
+commit
+*/
+.diff-wrapper {
+    margin: 20px 0;
+}
+
+.diff-wrapper span.diff-title {
+    /* 内部リンクがずれための回避策 */
+    padding-top: 50px;
+    margin-top: -50px;
+    font-size: 14px;
+}
+
+/*
+blame
+*/
+.blame a {
+    color: #4183C4;
+}
+
+/*
+userpage
+*/
+.user h1.username {
+    color: #495961;
+    text-shadow: 1px 1px 0 #FFFFFF;
+    font-size: 30px;
+    font-weight: bold;
+    height: 54px;
+    line-height: 54px;
+}
+
+.user h1.username em {
+    color: #99A7AF;
+    font-style: normal;
+    font-weight: normal;
+}
+
+.user .acctions {
+    height: 54px;
+    line-height: 54px;
+}
+
+.user .acctions span {
+    vertical-align: middle;
+}
+
+.user .acctions a {
+    vertical-align: middle;
+}
+
+.vcard dl {
+    font-size: 12px;
+    margin: 5px 0 0;
+}
+
+.vcard dl dt {
+    color: #999999;
+    float: left;
+    margin: 0;
+    width: 115px;
+}
+
+.vcard dl dd {
+    margin: 0;
+}
+
+/**
+repository
+**/
+.repositories {
+}
+
+.repositories h2 {
+    line-height: 22px;
+    vertical-align: middle;
+    margin-bottom: 10px;
+}
+
+.repositories h2 a {
+    font-size: 12px;
+    font-weight: normal;
+    padding: 1px 10px 3px 12px;
+}
+
+.repositories .repository {
+    margin: 15px 0;
+    border: #DDDDDD solid 1px;
+    border-radius: 4px;
+}
+
+.repositories .repository .repository-title {
+    padding: 5px 0 5px 10px;
+}
+
+.repositories .repository .repository-title a {
+    color: #4183C4;
+    font-size: 18px;
+}
+
+.repositories .repository .repository-meta {
+    border-top: #DDDDDD solid 1px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background-color: #FAFAFA;
+    padding: 5px 0 5px 10px;
+    color: #888888;
+    font-size: 11px;
+}
+
+/**
+dash board
+**/
+
+.hero-unit .btn-large {
+    font-size: 24px;
 }
