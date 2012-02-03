@@ -13,7 +13,7 @@ abstract class AbstractController {
         username = username ?: params.username
         user = User.findByUsername(username)
         if (!user) {
-            throw new NoSuchRequestHandlingMethodException('user not found')
+            throw new NoSuchUserException()
         }
     }
 
@@ -23,8 +23,11 @@ abstract class AbstractController {
         }
         project = Project.findByUserAndName(user, params.project)
         if (!project) {
-            throw new NoSuchRequestHandlingMethodException('project not found')
+            throw new NoSuchUserException()
         }
     }
 
+}
+
+class NoSuchUserException extends Exception {
 }

@@ -7,35 +7,34 @@
 <body>
 <h1>Account Settings</h1>
 
-<ul class="tabs">
-    <li class="active">
-        <g:link controller="account">Account Admin</g:link>
-    </li>
-    <li>
-        <g:link controller="account" action="admin">Account Admin</g:link>
-    </li>
-    <li>
-        <g:link controller="account" action="ssh">SSH Public Keys</g:link>
-    </li>
-</ul>
+<div class="tabbable tabs-left">
 
-<g:if test="${flash.message}">
-    <div class="alert-message success">
-        <a class="close" href="#">×</a>
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <g:link controller="account">Profile</g:link>
+        </li>
+        <li>
+            <g:link controller="account" action="admin">Account Admin</g:link>
+        </li>
+        <li>
+            <g:link controller="account" action="ssh">SSH Public Keys</g:link>
+        </li>
+    </ul>
 
-        <p>${flash.message}</p>
-    </div>
-</g:if>
-
-<div class="row show-grid">
-    <div class="span16">
+    <div class="tab-content span5">
+        <g:if test="${flash.message}">
+            <div class="alert alert-success" data-alert="alert">
+                <a class="close" data-dismiss="alert" href="#">&times;</a>
+                ${flash.message}
+            </div>
+        </g:if>
         <g:form controller="account">
             <fieldset>
-                <div class="clearfix ${hasErrors(bean: user, field: 'name', 'error')}">
+                <div class="control-group ${hasErrors(bean: user, field: 'name', 'error')}">
                     <label for="name">Name</label>
 
-                    <div class="input">
-                        <g:textField name="name" size="30"
+                    <div class="controls">
+                        <g:textField name="name" class="span4"
                                      value="${fieldValue(bean: user, field: 'name')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'name', 'true')}">
                             <span class="help-inline">${fieldError(bean: user, field: 'name')}</span>
@@ -43,11 +42,11 @@
                     </div>
                 </div>
 
-                <div class="clearfix ${hasErrors(bean: user, field: 'email', 'error')}">
+                <div class="control-group ${hasErrors(bean: user, field: 'email', 'error')}">
                     <label for="email">Email Address</label>
 
-                    <div class="input">
-                        <g:textField name="email" size="30"
+                    <div class="controls">
+                        <g:textField name="email" class="span4"
                                      value="${fieldValue(bean: user, field: 'email')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'email', 'true')}">
                             <span class="help-inline">${fieldError(bean: user, field: 'email')}</span>
@@ -55,11 +54,11 @@
                     </div>
                 </div>
 
-                <div class="clearfix ">
+                <div class="control-group">
                     <label for="location">Location</label>
 
-                    <div class="input ${hasErrors(bean: user, field: 'location', 'error')}">
-                        <g:textField name="location" size="30"
+                    <div class="controls ${hasErrors(bean: user, field: 'location', 'error')}">
+                        <g:textField name="location" class="span4"
                                      value="${fieldValue(bean: user, field: 'location')}"/>
                         <g:if test="${hasErrors(bean: user, field: 'location', 'true')}">
                             <span class="help-inline">${fieldError(bean: user, field: 'location')}</span>
@@ -67,17 +66,19 @@
                     </div>
                 </div>
 
-                <div class="clearfix">
-                    <div class="input">
+                <div class="control-group">
+                    <div class="controls">
                         <g:submitButton name="update-button" value="Update information"
-                                        class="btn primary"/>
+                                        class="btn btn-primary"/>
                     </div>
                 </div>
             </fieldset>
         </g:form>
     </div>
+
 </div>
-<r:require module="bootstrap_alerts"/>
+
+
 <r:script>
     $(function () {
         $(".alert-message").alert()

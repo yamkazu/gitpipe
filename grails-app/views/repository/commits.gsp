@@ -8,7 +8,6 @@
 
 <g:render template="header" model="[user: user, project: project]"/>
 <g:render template="tabs" model="[user: user, project: project, ref: ref, active: 'commits']"/>
-<g:render template="current" model="[ref: ref]"/>
 
 <h3>Commit History</h3>
 

@@ -17,6 +17,8 @@ class Project {
         name(blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_]+", unique: ['user', 'name'])
     }
 
+    static transients = ['repository']
+
     GpRepository getRepository() {
         new GpRepository(directory())
     }

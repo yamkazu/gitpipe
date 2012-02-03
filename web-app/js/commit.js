@@ -34,13 +34,12 @@
             $changes.append($('<span>').addClass('add').append(count(addLine, '+')));
             $changes.append($('<span>').addClass('remove').append(count(removeLine, '-')));
             $changes.attr('title', addLine + ' insertions(+), ' + removeLine + ' deletions(-)');
-            $changes.attr('ref', 'twipsy');
-            $changes.twipsy();
+            $changes.tooltip();
             return $changes;
         },
 
         renderCommitInFiles: function(entries) {
-            var $table = $('<table>').addClass('condensed-table');
+            var $table = $('<table>').addClass('toc');
             var $tbody = $('<tbody>').appendTo($table);
             var sumAdd = 0;
             var sumRemove = 0;
@@ -49,16 +48,16 @@
                 var entry = entries[i];
                 var $tr = $('<tr>');
                 if (entry.type === 'ADD') {
-                    $('<td>').append($('<span class="label notice">ADD</span>')).appendTo($tr);
+                    $('<td>').append($('<span class="label label-info">ADD</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.newFile.path)).appendTo($tr);
                 } else if (entry.type === 'MODIFY') {
-                    $('<td>').append($('<span class="label success">MODIFY</span>')).appendTo($tr);
+                    $('<td>').append($('<span class="label label-success">MODIFY</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.newFile.path)).appendTo($tr);
                 } else if (entry.type === 'DELETE') {
-                    $('<td>').append($('<span class="label important">DELETE</span>')).appendTo($tr);
+                    $('<td>').append($('<span class="label label-important">DELETE</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + entry.oldFile.id).text(entry.oldFile.path)).appendTo($tr);
                 } else if (entry.type === 'RENAME') {
-                    $('<td>').append($('<span class="label warning">RENAME</span>')).appendTo($tr);
+                    $('<td>').append($('<span class="label label-warning">RENAME</span>')).appendTo($tr);
                     $('<td>').append($('<a>').attr('href', '#' + entry.newFile.id).text(entry.oldFile.path + " -> " + entry.newFile.path)).appendTo($tr);
                 } else if (entry.type === 'COPY') {
                     $('<td>').append($('<span class="label">COPY</span>')).appendTo($tr);
@@ -71,47 +70,37 @@
                 $tr.appendTo($tbody);
             }
             this.target.append($table);
-            this.target.append($('<p>').text(entries.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
+            this.target.prepend($('<p>').text(entries.length + ' changed files ' + sumAdd + ' insertions(+), ' + sumRemove + ' deletions(-)'));
         },
 
         renderDiffs:function(entries) {
-            this.target.append($('<h3>').text('Diffs'));
             for (var i = 0; i < entries.length; i++) {
                 var entry = entries[i];
-                var $diff = $('<div>').addClass('diff');
+                var $diff = $('<div>').addClass('bubble diff-wrapper');
 
-                var $title = $('<div>').addClass('title');
-                var $path = $('<h4>').appendTo($title);
+                var $title = $('<div>').addClass('blob-info');
+                $title.append($('<span class="icon-txt"></span>'));
+                var $path = $('<span>').addClass('diff-title').appendTo($title);
                 if (entry.type === 'ADD') {
                     $path.attr('id', entry.newFile.id);
-                    $path.append('<span class="label notice">ADD</span>')
-                    $path.append($('<small>').text(entry.newFile.mode));
                     $path.append(entry.newFile.path);
-                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                    $title.append($('<div>').addClass('actions pull-right').append($('<a>').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10))));
                 } else if (entry.type === 'MODIFY') {
                     $path.attr('id', entry.newFile.id);
-                    $path.append('<span class="label success">MODIFY</span>');
-                    $path.append($('<small>').text(entry.newFile.mode));
                     $path.append(entry.newFile.path);
-                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                    $title.append($('<div>').addClass('actions pull-right').append($('<a>').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10))));
                 } else if (entry.type === 'DELETE') {
                     $path.attr('id', entry.oldFile.id);
-                    $path.append('<span class="label important">DELETE</span>');
-                    $path.append($('<small>').text(entry.oldFile.mode));
                     $path.append(entry.oldFile.path);
-                    $title.append($('<a>').addClass('pull-right').attr('href', entry.oldFile.blobUrl).text(entry.oldFile.id.substr(0, 10)));
+                    $title.append($('<div>').addClass('actions pull-right').append($('<a>').attr('href', entry.oldFile.blobUrl).text(entry.oldFile.id.substr(0, 10))));
                 } else if (entry.type === 'RENAME') {
                     $path.attr('id', entry.newFile.id);
-                    $path.append('<span class="label warning">RENAME</span>');
-                    $path.append($('<small>').text(entry.newFile.mode));
                     $path.append(entry.oldFile.path + " -> " + entry.newFile.path);
-                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                    $title.append($('<div>').addClass('actions pull-right').append($('<a>').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10))));
                 } else if (entry.type === 'COPY') {
                     $path.attr('id', entry.newFile.id);
-                    $path.append('<span class="label">COPY</span>');
-                    $path.append($('<small>').text(entry.newFile.mode));
                     $path.append(entry.oldFile.path + " -> " + entry.newFile.path);
-                    $title.append($('<a>').addClass('pull-right').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10)));
+                    $title.append($('<div>').addClass('actions pull-right').append($('<a>').attr('href', entry.newFile.blobUrl).text(entry.newFile.id.substr(0, 10))));
                 }
                 $title.appendTo($diff);
 

@@ -1,18 +1,23 @@
-<h3><small>Latest commit to the <strong>${ref}</strong></small></h3>
+<p class="last-commit"><i class="icon-time"></i>Latest commit to the <strong>${ref}</strong> branch</p>
+
 <div class="commit">
-    <time>${commit.date}</time>
+    <div class="commit-title">
+        <span>${commit.message}</span>
+    </div>
 
-    <div class="meta">
-        <p class="message">${commit.message}</p>
-        <br>
-
+    <div class="commit-meta">
         <g:if test="${commitUser}">
-            <g:link mapping="user" params="[username: commitUser.username]">${commitUser.username}</g:link>
+            <g:link class="author" mapping="user" params="[username: commitUser.username]">${commitUser.username}</g:link>
         </g:if>
         <g:else>
-            <p class="author">${commit.author.name}</p>
+            <span class="author">${commit.author.name}</span>
         </g:else>
-
-        <p class="pull-right id"><g:link mapping="repository_commit" params="[username: user.username, project: project.name, id: commit.id]">${commit.id.substring(0, 10)}</g:link></p>
+        authored
+        <time>${commit.date}</time>
+        <g:link class="pull-right sha-block" mapping="repository_commit"
+                params="[username: user.username, project: project.name, id: commit.id]">
+            commit
+            <span class="sha">${commit.id.substring(0, 10)}</span>
+        </g:link>
     </div>
 </div>

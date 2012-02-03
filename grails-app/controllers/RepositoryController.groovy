@@ -103,11 +103,15 @@ class RepositoryController extends AbstractController {
     def tree(String ref, @RequestParameter('path') String treePath) {
         withFormat {
             html {
+                def map = [user: user, project: project, ref: ref, path: treePath]
+
                 def commit = repository.logLimit1(ref)
-                def map = [user: user, project: project, ref: ref, path: treePath, commit: commit]
-                def commitUser = User.findByEmail(commit.author.email)
-                if (commitUser) {
-                    map.commitUser = commitUser
+                if (commit) {
+                    map.commit = commit
+                    def commitUser = User.findByEmail(commit.author.email)
+                    if (commitUser) {
+                        map.commitUser = commitUser
+                    }
                 }
                 map
             }

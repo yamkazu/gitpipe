@@ -9,37 +9,36 @@
 
 <h1>Create a New Repository</h1>
 
-<div class="row show-grid">
+<div class="row">
     <div class="span16">
         <g:form controller="project">
             <fieldset>
-                <div class="clearfix ${hasErrors(bean: repositoryInfo, field: 'name', 'error')}">
-                    <label for="projectName">Project Name</label>
+                <div class="control-group ${hasErrors(bean: project, field: 'name', 'error')}">
+                    <label for="name">Project Name</label>
 
-                    <div class="input">
-                        <g:textField name="projectName" size="30"
-                                     value="${fieldValue(bean: repositoryInfo, field: 'name')}"/>
-                        <g:if test="${hasErrors(bean: repositoryInfo, field: 'name', 'true')}">
-                            <span class="help-inline">${fieldError(bean: repositoryInfo, field: 'name')}</span>
+                    <div class="controls">
+                        <g:textField name="name" value="${fieldValue(bean: project, field: 'name')}"/>
+                        <g:if test="${hasErrors(bean: project, field: 'name', 'true')}">
+                            <span class="help-inline">${fieldError(bean: project, field: 'name')}</span>
                         </g:if>
                     </div>
                 </div>
 
-                <div class="clearfix ${hasErrors(bean: repositoryInfo, field: 'description', 'error')}">
+                <div class="control-group ${hasErrors(bean: project, field: 'description', 'error')}">
                     <label for="description">Description</label>
 
-                    <div class="input">
+                    <div class="controls">
                         <g:textField name="description" size="30"
-                                     value="${fieldValue(bean: repositoryInfo, field: 'description')}"/>
-                        <g:if test="${hasErrors(bean: repositoryInfo, field: 'description', 'true')}">
-                            <span class="help-inline">${fieldError(bean: repositoryInfo, field: 'description')}</span>
+                                     value="${fieldValue(bean: project, field: 'description')}"/>
+                        <g:if test="${hasErrors(bean: project, field: 'description', 'true')}">
+                            <span class="help-inline">${fieldError(bean: project, field: 'description')}</span>
                         </g:if>
                     </div>
                 </div>
 
-                <div class="clearfix">
-                    <div class="input">
-                        <g:submitButton name="signup_button" value="Create repository" class="btn primary"/>
+                <div class="control-group">
+                    <div class="controls">
+                        <g:submitButton name="signup_button" value="Create repository" class="btn"/>
                     </div>
                 </div>
             </fieldset>

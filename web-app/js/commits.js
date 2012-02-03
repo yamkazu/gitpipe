@@ -29,18 +29,18 @@
             for (var i = 0; i < commits.length; i++) {
                 var commit = commits[i];
                 var $commit = $('<div>').addClass('commit');
-                $('<time>').text(commit.date).appendTo($commit);
+                $('<div>').addClass('commit-title').append($('<span>').text(commit.shortMessage)).appendTo($commit);
 
-                var $meta = $('<div>').addClass('meta').appendTo($commit);
-                $('<p>').addClass('message').text(commit.shortMessage).appendTo($meta);
-                $('<br>').appendTo($meta);
-
+                var $meta = $('<div>').addClass('commit-meta').appendTo($commit);
                 if (commit.author.username) {
-                    $('<p>').addClass('author').append($('<a>').attr('href', commit.author.url).text(commit.author.username)).appendTo($meta);
+                    $('<a>').addClass('author').attr('href', commit.author.url).text(commit.author.username).appendTo($meta);
                 } else {
-                    $('<p>').addClass('author').text(commit.author.name).appendTo($meta);
+                    $('<span>').addClass('author').text(commit.author.name).appendTo($meta);
                 }
-                $('<p>').addClass('pull-right id').append($('<a>').attr('href', commit.url).text(commit.id.substr(0, 10))).appendTo($meta);
+                $meta.append('&nbsp;');
+                $meta.append('authored');
+                $('<time>').text(commit.date).appendTo($meta);
+                $('<a>').attr('href', commit.url).addClass('pull-right sha-block').append('commit').append('&nbsp;').append($('<span>').addClass('sha').append(commit.id.substr(0, 10))).appendTo($meta);
 
                 this.target.append($commit);
             }

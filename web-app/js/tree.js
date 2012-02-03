@@ -6,7 +6,7 @@
         this.target = $this;
 
         this.nav = $('<ul>').addClass('breadcrumb').appendTo(this.target);
-        this.content = $('<div>').appendTo(this.target);
+        this.content = $('<div>').addClass('bubble tree-browser-wrapper').appendTo(this.target);
 
         this.nextDirection = "";
 
@@ -177,7 +177,7 @@
             var $code = $(html);
             $('.code div', $code).removeClass('container');
 
-            var $tr = $('tr', $code)
+            var $tr = $('tr', $code);
             var $td = $('<td>').addClass('blame').prependTo($tr);
 
             var entries = data.entries;
@@ -211,9 +211,10 @@
 
         renderBlobInfo:function (data) {
             var $info = $('<div>').addClass('blob-info');
+            $('<span>').addClass('icon-txt').appendTo($info);
             $('<span>').text(data.mode).appendTo($info);
             $('<span>').text(data.size + ' kb').appendTo($info);
-            var $actions = $('<div>').addClass('pull-right').appendTo($info);
+            var $actions = $('<div>').addClass('actions pull-right').appendTo($info);
             $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
             $actions.append($('<a>').attr('href', data.blameUrl).text('blame'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
@@ -222,9 +223,10 @@
 
         renderBlameInfo:function (data) {
             var $info = $('<div>').addClass('blob-info');
+            $('<span>').addClass('icon-txt').appendTo($info);
             $('<span>').text(data.raw.mode).appendTo($info);
             $('<span>').text(data.raw.size + ' kb').appendTo($info);
-            var $actions = $('<div>').addClass('pull-right').appendTo($info);
+            var $actions = $('<div>').addClass('actions pull-right').appendTo($info);
             $actions.append($('<a>').attr('href', data.historyUrl).text('history'));
             $actions.append($('<a>').attr('href', data.current.url).text('normal view'));
             $actions.append($('<a>').attr('href', data.rawUrl).text('raw'));
@@ -235,7 +237,7 @@
             var that = this;
             callback = callback || function () {
             };
-            this.nextDirection = "left"
+            this.nextDirection = "left";
             this.slideContent("hide", "right", function () {
                 that.content.empty();
                 callback();
@@ -254,11 +256,10 @@
         },
 
         renderTree:function (data) {
-            var parent = data.parent;
             var files = data.files;
 
             // table
-            var $table = $('<table>').addClass('bordered-table');
+            var $table = $('<table>').addClass('tree-browser');
 
             // thead
             var $thead = $('<thead>').appendTo($table);
@@ -266,14 +267,14 @@
                 .append($('<th>').text(''))
                 .append($('<th>').text('name'))
                 .append($('<th>').text('age'))
-                .append($('<th>').text('message'))
-                .append($('<th>').append($('<a>').attr('href', data.historyUrl).text('history'))).appendTo($thead);
+                .append($('<th>').append($('<div>').append('message')
+                                                   .append($('<a>').addClass('history pull-right').attr('href', data.historyUrl).text('history')))).appendTo($thead);
 
             // tbody
             var $tbody = $('<tbody>').appendTo($table);
 
             var $tr = $('<tr>').appendTo($tbody);
-            this.renderTrAsParent(parent, $tr);
+            this.renderTrAsParent(data.parents, $tr);
 
             for (var i = 0; i < files.length; i++) {
                 $tr = $('<tr>').appendTo($tbody);
@@ -290,25 +291,29 @@
         },
 
         slideContent:function (mode, direction, callback) {
-            direction = direction || this.nextDirection
+            console.log(mode);
+            console.log(direction);
+            direction = direction || this.nextDirection;
             if (!direction || direction === '') {
                 this.content.show();
                 return;
             }
+            console.log(mode);
+            console.log(direction);
             this.content.effect('slide', { mode:mode, direction:direction }, 200, callback);
         },
 
-        renderTrAsParent:function (parent, $tr) {
+        renderTrAsParent:function (parents, $tr) {
             var that = this;
-            if (parent) {
+            if (parents) {
+                var parent = parents[parents.length - 1];
                 $('<td>').appendTo($tr);
-                $('<td>').append($('<a>').text('..').attr('href', parent).click(function (e) {
+                $('<td>').append($('<a>').text('..').attr('href', parent.url).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsBack(function () {
-                        that.getTree(parent);
+                        that.getTree(parent.url);
                     });
                 })).appendTo($tr);
-                $('<td>').appendTo($tr);
                 $('<td>').appendTo($tr);
                 $('<td>').appendTo($tr);
             }
@@ -317,8 +322,8 @@
         renderTrAsBlob:function (current, file, $tr) {
             var that = this;
             (function (current, file, $tr) {
-                $('<td>').text(file.type).appendTo($tr);
-                $('<td>').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
+                $('<td>').append($('<i>').addClass('icon-txt')).addClass('icon').appendTo($tr);
+                $('<td>').addClass('content').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsForward(function () {
                         that.getBlob(file.url);
@@ -327,18 +332,19 @@
                 $('<td>').text(file.commit.date).appendTo($tr);
                 var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
                 if (file.commit.author.username) {
-                    message.append('&nbsp;')
-                    $('<a>').attr('href', file.commit.author.url).text('[' + file.commit.author.username + ']').appendTo(message);
+                    message.append('&nbsp;');
+                    message.append('[');
+                    message.append($('<a>').addClass('author').attr('href', file.commit.author.url).text(file.commit.author.username));
+                    message.append(']');
                 }
-                $('<td>').appendTo($tr);
             })(current, file, $tr);
         },
 
         renderTrAsTree:function (current, file, $tr) {
             var that = this;
             (function (current, file, $tr) {
-                $('<td>').text(file.type).appendTo($tr);
-                $('<td>').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
+                $('<td>').append($('<i>').addClass('icon-dir')).addClass('icon').appendTo($tr);
+                $('<td>').addClass('content').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
                     that.hideContentAsForward(function () {
                         that.getTree(file.url);
@@ -347,10 +353,11 @@
                 $('<td>').text(file.commit.date).appendTo($tr);
                 var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
                 if (file.commit.author.username) {
-                    message.append('&nbsp;')
-                    $('<a>').attr('href', file.commit.author.url).text('[' + file.commit.author.username + ']').appendTo(message);
+                    message.append('&nbsp;');
+                    message.append('[');
+                    message.append($('<a>').addClass('author').attr('href', file.commit.author.url).text(file.commit.author.username));
+                    message.append(']');
                 }
-                $('<td>').appendTo($tr);
             })(current, file, $tr);
         }
     });

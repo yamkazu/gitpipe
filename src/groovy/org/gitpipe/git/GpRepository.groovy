@@ -128,6 +128,8 @@ class GpRepository {
     }
 
     GpCommit logLimit1(String ref = repository.branch) {
+        if (!hasCommits()) return
+
         RevWalk revWalk = null;
         try {
             ObjectId objectId = repository.resolve(ref)
@@ -241,7 +243,7 @@ class GpRepository {
         blame
     }
 
-    private boolean hasCommits() {
+    boolean hasCommits() {
         if (repository != null && repository.getDirectory().exists()) {
             return (new File(repository.getDirectory(), "objects").list().length > 2) || (new File(repository.getDirectory(), "objects/pack").list().length > 0)
         }
