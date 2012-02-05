@@ -12,7 +12,7 @@ modules = {
     }
 
     gitpipe_treeviewer {
-        dependsOn 'gitpipe, ui_effects_slide, syntax_highlighter'
+        dependsOn 'gitpipe, ui_effects_slide, syntax_highlighter, history'
         resource url: 'js/tree.js'
     }
 
@@ -24,6 +24,11 @@ modules = {
     gitpipe_commitviewer {
         dependsOn 'gitpipe, syntax_highlighter'
         resource url: 'js/commit.js'
+    }
+
+    history {
+        dependsOn 'jquery'
+        resource url: 'js/history/jquery.history.js'
     }
 
     ui_effects_core {

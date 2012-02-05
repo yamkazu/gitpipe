@@ -9,18 +9,31 @@
         this.content = $('<div>').addClass('bubble tree-browser-wrapper').appendTo(this.target);
 
         this.nextDirection = "";
+        this.eventType = "";
 
-        window.addEventListener('popstate', function (event) {
-            that.hideContentAsBack(function () {
-                var type = event.state;
-                var data = that.target.data(location.pathname);
-                if (type === "tree") {
-                    that.renderTree(data);
-                } else if (type === "blob") {
-                    that.renderBlob(data);
-                }
-            });
-        }, false);
+        // Prepare
+        var History = window.History; // Note: We are using a capital H instead of a lower h
+        if (!History.enabled) {
+            // History.js is disabled for this browser.
+            // This is because we can optionally choose to support HTML4 browsers or not.
+            return false;
+        }
+
+        // Bind to StateChange Event
+        History.Adapter.bind(window, 'statechange', function () { // Note: We are using statechange instead of popstate
+            var state = History.getState(); // Note: We are using History.getState() instead of event.state
+            if (that.eventType === 'forward') {
+                that.eventType = 'back';
+                that.hideContentAsForward(function () {
+                    that.handleEvent(state);
+                });
+            }
+            else {
+                that.hideContentAsBack(function () {
+                    that.handleEvent(state);
+                });
+            }
+        });
     };
 
     $.extend(TreeViewer.prototype, {
@@ -39,6 +52,16 @@
             that.renderNavPath(currnet, true);
         },
 
+        handleEvent:function (state) {
+            if (state.data.type === 'tree') {
+                this.getTree(state.url);
+            } else if (state.data.type === 'blob') {
+                this.getBlob(state.url);
+            } else if (state.data.type === 'blame') {
+                this.getBlame(state.url);
+            }
+        },
+
         renderNavPath:function (pathInfo, current) {
             var $path = $('<li>');
             var that = this;
@@ -48,30 +71,27 @@
                 $('<a>').attr('href', pathInfo.url).text(pathInfo.name).click(
                     function (e) {
                         e.preventDefault();
-                        that.hideContentAsBack(function () {
-                            that.getTree(pathInfo.url);
-                        });
+                        that.pushEvent('tree', pathInfo.url, 'back');
                     }).appendTo($path);
                 $path.append($('<span>').addClass('divider').text('/')).appendTo(that.nav);
             }
         },
 
-        pushHistory:function (type, url, pushState) {
-            pushState = pushState === undefined ? true : pushState;
-            if (pushState) {
-                window.history.pushState(type, null, url);
-            } else {
-                window.history.replaceState(type, null, url);
-            }
+        pushEvent:function (type, url, eventType) {
+            this.eventType = eventType;
+            History.pushState({type:type}, null, url);
         },
 
-        getTree:function (url, pushUrl, pushState) {
+        replaceEvent:function (type, url) {
+            History.replaceState({type:type}, null, url);
+        },
+
+        getTree:function (url, pushUrl) {
             pushUrl = pushUrl || url;
             var that = this;
 
             var cache = that.target.data(pushUrl);
             if (cache) {
-                that.pushHistory("tree", pushUrl, pushState);
                 that.renderTree(cache);
                 return;
             }
@@ -79,13 +99,12 @@
             $.ajax({
                 type:"get",
                 dataType:"json",
-                url:url,
+                url:url + "?format=json",
                 success:function (data) {
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);
                     }
-                    that.pushHistory("tree", pushUrl, pushState);
                     that.renderTree(data);
                 }
             });
@@ -97,7 +116,6 @@
 
             var cache = that.target.data(pushUrl);
             if (cache) {
-                that.pushHistory("blob", pushUrl, pushState);
                 that.renderBlob(cache);
                 return;
             }
@@ -105,25 +123,23 @@
             $.ajax({
                 type:"get",
                 dataType:"json",
-                url:url,
+                url:url + "?format=json",
                 success:function (data) {
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);
                     }
-                    that.pushHistory("blob", pushUrl, pushState);
                     that.renderBlob(data);
                 }
             });
         },
 
-        getBlame:function (url, pushUrl, pushState) {
+        getBlame:function (url, pushUrl) {
             pushUrl = pushUrl || url;
             var that = this;
 
             var cache = that.target.data(pushUrl);
             if (cache) {
-                that.pushHistory("blame", pushUrl, pushState);
                 that.renderBlob(cache);
                 return;
             }
@@ -131,18 +147,16 @@
             $.ajax({
                 type:"get",
                 dataType:"json",
-                url:url,
+                url:url + "?format=json",
                 success:function (data) {
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);
                     }
-                    that.pushHistory("blame", pushUrl, pushState);
                     that.renderBlame(data);
                 }
             });
         },
-
 
         renderBlob:function (data) {
             this.content.append(this.renderBlobInfo(data));
@@ -268,7 +282,7 @@
                 .append($('<th>').text('name'))
                 .append($('<th>').text('age'))
                 .append($('<th>').append($('<div>').append('message')
-                                                   .append($('<a>').addClass('history pull-right').attr('href', data.historyUrl).text('history')))).appendTo($thead);
+                .append($('<a>').addClass('history pull-right').attr('href', data.historyUrl).text('history')))).appendTo($thead);
 
             // tbody
             var $tbody = $('<tbody>').appendTo($table);
@@ -291,15 +305,11 @@
         },
 
         slideContent:function (mode, direction, callback) {
-            console.log(mode);
-            console.log(direction);
             direction = direction || this.nextDirection;
             if (!direction || direction === '') {
                 this.content.show();
                 return;
             }
-            console.log(mode);
-            console.log(direction);
             this.content.effect('slide', { mode:mode, direction:direction }, 200, callback);
         },
 
@@ -310,9 +320,7 @@
                 $('<td>').appendTo($tr);
                 $('<td>').append($('<a>').text('..').attr('href', parent.url).click(function (e) {
                     e.preventDefault();
-                    that.hideContentAsBack(function () {
-                        that.getTree(parent.url);
-                    });
+                    that.pushEvent('tree', parent.url, 'back');
                 })).appendTo($tr);
                 $('<td>').appendTo($tr);
                 $('<td>').appendTo($tr);
@@ -325,9 +333,7 @@
                 $('<td>').append($('<i>').addClass('icon-txt')).addClass('icon').appendTo($tr);
                 $('<td>').addClass('content').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
-                    that.hideContentAsForward(function () {
-                        that.getBlob(file.url);
-                    });
+                    that.pushEvent('blob', file.url, 'forward');
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
                 var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
@@ -346,9 +352,7 @@
                 $('<td>').append($('<i>').addClass('icon-dir')).addClass('icon').appendTo($tr);
                 $('<td>').addClass('content').append($('<a>').text(file.name).attr('href', file.url).click(function (e) {
                     e.preventDefault();
-                    that.hideContentAsForward(function () {
-                        that.getTree(file.url);
-                    });
+                    that.pushEvent('tree', file.url, 'forward');
                 })).appendTo($tr);
                 $('<td>').text(file.commit.date).appendTo($tr);
                 var message = $('<td>').append($('<a>').attr('href', file.commit.url).text(file.commit.shortMessage)).appendTo($tr);
@@ -366,21 +370,23 @@
     $.fn.gitTree = function (url) {
         return this.each(function () {
             var viewer = new TreeViewer($(this));
-            viewer.getTree(url, location.pathname, false);
+            viewer.replaceEvent('tree', location.pathname);
+            viewer.getTree(url, location.pathname);
         });
     };
 
     $.fn.gitBlob = function (url) {
         return this.each(function () {
             var viewer = new TreeViewer($(this));
-            viewer.getBlob(url, location.pathname, false);
+            viewer.replaceEvent('blob', location.pathname);
+            viewer.getBlob(url, location.pathname);
         });
     };
 
     $.fn.gitBlame = function (url) {
         return this.each(function () {
             var viewer = new TreeViewer($(this));
-            viewer.getBlame(url, location.pathname, false);
+            viewer.getBlame(url, location.pathname);
         });
     };
 

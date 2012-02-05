@@ -18,6 +18,9 @@ class RepositoryController extends AbstractController {
         repository = project.repository
     }
 
+    def afterInterceptor = {
+    }
+
     def commits(String ref, String path, int page) {
         withFormat {
             html {
@@ -98,8 +101,7 @@ class RepositoryController extends AbstractController {
             }
         }
     }
-
-
+    
     def tree(String ref, @RequestParameter('path') String treePath) {
         withFormat {
             html {
