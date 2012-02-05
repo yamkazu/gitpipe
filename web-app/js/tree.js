@@ -6,6 +6,7 @@
         this.target = $this;
 
         this.nav = $('<ul>').addClass('breadcrumb').appendTo(this.target);
+        this.loading = $('<div>').addClass('loading').hide().appendTo(this.target);
         this.content = $('<div>').addClass('bubble tree-browser-wrapper').appendTo(this.target);
 
         this.nextDirection = "";
@@ -96,11 +97,13 @@
                 return;
             }
 
+            that.loading.show();
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url:url + "?format=json",
                 success:function (data) {
+                    that.loading.hide();
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);
@@ -120,11 +123,13 @@
                 return;
             }
 
+            that.loading.show();
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url:url + "?format=json",
                 success:function (data) {
+                    that.loading.hide();
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);
@@ -144,11 +149,13 @@
                 return;
             }
 
+            that.loading.show();
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url:url + "?format=json",
                 success:function (data) {
+                    that.loading.hide();
                     that.target.data(pushUrl, data);
                     if (pushUrl !== url) {
                         that.target.data(url, data);

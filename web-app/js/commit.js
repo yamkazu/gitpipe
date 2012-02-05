@@ -9,11 +9,13 @@
 
         getCommit:function (url) {
             var that = this;
+            that.target.addClass('loading');
             $.ajax({
                 type:"get",
                 dataType:"json",
-                url:url,
+                url:url + "?format=json",
                 success:function (data) {
+                    that.target.removeClass('loading');
                     that.renderCommit(data);
                 }
             });

@@ -4,21 +4,35 @@
     var CommitsViewer = function ($this) {
         this.target = $this;
         var that = this;
-        this.readButton = $('<a>').addClass('btn small').text('more read').click(function(e){
+        this.readButton = $('<a>').addClass('btn small read-more').text('read more').click(function(e){
             e.preventDefault();
             that.getCommits($(this).attr('href'));
-        });
+        }).hide();
         this.target.after(this.readButton);
+        this.loading = $('<div>').addClass('loading').show();
+        this.target.after(this.loading);
     }
 
     $.extend(CommitsViewer.prototype, {
         getCommits:function (url) {
+
+            if(url.match(/\?/)) {
+                url += '&';
+            } else {
+                url += '?';
+            }
+            url += 'format=json';
+
             var that = this;
+            that.loading.show();
+            that.readButton.hide();
             $.ajax({
                 type:"get",
                 dataType:"json",
                 url: url,
                 success:function (data) {
+                    that.loading.hide();
+                    that.readButton.show();
                     that.renderCommits(data);
                 }
             });
