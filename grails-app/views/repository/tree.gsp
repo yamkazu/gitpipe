@@ -7,28 +7,18 @@
 <body>
 
 <g:render template="/repository/header" model="[user: user, project: project]"/>
+<g:render template="/repository/tabs" model="[user: user, project: project, ref: ref, active: 'files']"/>
+<g:render template="/repository/lastCommit"
+          model="[user: user, project: project, ref: ref, commit: commit, commitUser: commitUser]"/>
 
+<div id="slider"></div>
 
-
-<g:if test="${project.repository.hasCommits()}">
-    <g:render template="/repository/tabs" model="[user: user, project: project, ref: ref, active: 'files']"/>
-    <g:render template="/repository/lastCommit"
-              model="[user: user, project: project, ref: ref, commit: commit, commitUser: commitUser]"/>
-
-    <div id="slider"></div>
-
-    <r:require module="gitpipe_treeviewer"/>
-    <g:javascript>
+<r:require module="gitpipe_treeviewer"/>
+<g:javascript>
     $(function () {
         $('#slider').gitTree("${createLink(mapping: 'repository_tree', params: [username: user.username, project: project.name, ref: ref, path: path])}");
     });
-    </g:javascript>
-</g:if>
-<g:else>
-    <div>
-        please commit
-    </div>
-</g:else>
+</g:javascript>
 
 </body>
 </html>

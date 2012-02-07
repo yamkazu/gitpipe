@@ -6,6 +6,7 @@ import org.gitpipe.git.GpBlame
 import org.gitpipe.git.GpDiff
 import org.gitpipe.git.GpRaw
 import org.gitpipe.git.GpRepository
+import org.springframework.http.HttpStatus
 
 class RepositoryController extends AbstractController {
 
@@ -16,6 +17,11 @@ class RepositoryController extends AbstractController {
         bindUser()
         bindProject()
         repository = project.repository
+
+        if (!repository.hasCommits() && (actionName != this.&tree.method || params.path)) {
+            redirect(mapping: 'project', params: [username: user.username, project: project.name])
+            return false
+        }
     }
 
     def afterInterceptor = {
@@ -101,8 +107,19 @@ class RepositoryController extends AbstractController {
             }
         }
     }
-    
+
     def tree(String ref, @RequestParameter('path') String treePath) {
+        if (!repository.hasCommits()) {
+            withFormat {
+                html {
+                    render view: 'setup', model: [user: user, project: project]
+                }
+                json {
+                    response.setStatus(HttpStatus.NOT_FOUND, 'This is Empty Repository')
+                }
+            }
+            return
+        }
         withFormat {
             html {
                 def map = [user: user, project: project, ref: ref, path: treePath]

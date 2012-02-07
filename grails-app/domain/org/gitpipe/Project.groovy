@@ -27,7 +27,7 @@ class Project {
         new File(repositoryUserDir(), repositoryName())
     }
 
-    private String repositoryName() {
+    String repositoryName() {
         name + Constants.DOT_GIT;
     }
 
