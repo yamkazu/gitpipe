@@ -34,7 +34,24 @@ class GpRepository {
     }
 
     String getDefaultBranch() {
-        return repository.branch
+        if (!hasCommits()) {
+            return repository.branch
+        }
+
+        def branches = getBranches();
+        if (branches.containsKey(repository.branch)) {
+            return repository.branch
+        }
+
+        RevWalk revWalk = null
+        try {
+            revWalk = new RevWalk(repository)
+            return branches.max { name, Ref ref ->
+                revWalk.parseCommit(ref.objectId).commitTime
+            }.key
+        } finally {
+            revWalk.release()
+        }
     }
 
     Map<String, Ref> getTags() {
