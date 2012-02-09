@@ -9,17 +9,7 @@
 
 <div class="tabbable tabs-left">
 
-    <ul class="nav nav-tabs">
-        <li class="active">
-            <g:link controller="account">Profile</g:link>
-        </li>
-        <li>
-            <g:link controller="account" action="admin">Account Admin</g:link>
-        </li>
-        <li>
-            <g:link controller="account" action="ssh">SSH Public Keys</g:link>
-        </li>
-    </ul>
+    <g:render template="tabs" model="[active: 'profile']" />
 
     <div class="tab-content span5">
         <g:if test="${flash.message}">

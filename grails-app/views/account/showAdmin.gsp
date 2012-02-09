@@ -9,17 +9,7 @@
 
 <div class="tabbable tabs-left">
 
-    <ul class="nav nav-tabs">
-        <li>
-            <g:link controller="account">Profile</g:link>
-        </li>
-        <li class="active">
-            <g:link controller="account" action="admin">Account Admin</g:link>
-        </li>
-        <li>
-            <g:link controller="account" action="ssh">SSH Public Keys</g:link>
-        </li>
-    </ul>
+    <g:render template="tabs" model="[active: 'admin']" />
 
     <div class="tab-content span5">
         <h3>Change your password</h3>

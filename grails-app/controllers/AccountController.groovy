@@ -1,21 +1,22 @@
 import grails.plugins.springsecurity.Secured
-import org.gitpipe.User
 import grails.validation.Validateable
+import org.gitpipe.User
+import org.gitpipe.PublicKey
+import org.springframework.http.HttpStatus
+import grails.converters.JSON
+import org.springframework.validation.FieldError
 
 @Secured(['ROLE_USER'])
-class AccountController {
+class AccountController extends AbstractController {
+
+    def beforeInterceptor = {
+        bindUser(springSecurityService.principal.username)
+    }
 
     def springSecurityService
 
     def showAccount() {
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        render view: 'showAccount', model: [user: user]
+        [user: user]
     }
 
     def updateAccount(AccountUpdateCommand command) {
@@ -24,23 +25,14 @@ class AccountController {
             return
         }
 
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        user.name = command.name
-        user.email = command.email
-        user.location = command.location
+        bindData(user, command)
         user.save()
 
         flash.message = message(code: "account.update.successful")
         redirect controller: 'account'
     }
 
-    def showAdmin = {
+    def showAdmin() {
     }
 
     def updatePassword(PasswordUpdateCommand command) {
@@ -49,19 +41,45 @@ class AccountController {
             return
         }
 
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        user.password = command.password
+        bindData(user, command)
         user.save()
 
         flash.passwordMessage = message(code: "password.update.successful")
-
         redirect controller: 'account', action: 'admin'
+    }
+
+    def showPublicKeys() {
+        withFormat {
+            html {
+                [publicKeys: user.publicKeys]
+            }
+            json {
+                render user.publicKeys as JSON
+            }
+        }
+    }
+    
+    def addPublicKey() {
+        def key = new PublicKey(params)
+        key.user = user
+        
+        if (!key.save()) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+            render(contentType: "text/json") {
+                args = array {
+                    for (FieldError f in key.errors.fieldErrors) {
+                        e = {
+                            name = f.field
+                            errorMessage = fieldError(bean: key, field: f.field)
+                        }
+                    }
+
+                }
+            }
+            return
+        }
+
+        render key as JSON
     }
 
 }

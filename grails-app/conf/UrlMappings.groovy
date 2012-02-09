@@ -15,6 +15,9 @@ class UrlMappings {
         name updatePassword: "/account/admin/password"(controller: "account") {
             action = "updatePassword"
         }
+        name account_ssh: "/account/ssh"(controller: "account") {
+            action = [GET: "showPublicKeys", POST: "addPublicKey"]
+        }
         "/account/admin"(controller: "account") {
             action = [GET: "showAdmin"]
         }
