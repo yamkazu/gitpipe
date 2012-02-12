@@ -1,3 +1,5 @@
+import com.sun.org.apache.bcel.internal.generic.PUTFIELD
+
 class UrlMappings {
 
 	static mappings = {
@@ -15,13 +17,13 @@ class UrlMappings {
         name updatePassword: "/account/admin/password"(controller: "account") {
             action = "updatePassword"
         }
-        name account_ssh: "/account/ssh"(controller: "account") {
-            action = [GET: "showPublicKeys", POST: "addPublicKey"]
+        name account_ssh: "/account/ssh/$id?"(controller: "account") {
+            action = [GET: "showPublicKeys", POST: "addPublicKey", PUT: "updatePublicKey", DELETE: "deletePublicKey"]
         }
-        "/account/admin"(controller: "account") {
+        name account_admin: "/account/admin"(controller: "account") {
             action = [GET: "showAdmin"]
         }
-        "/account"(controller: "account") {
+        name account: "/account"(controller: "account") {
             action = [GET: "showAccount", POST: "updateAccount"]
         }
 

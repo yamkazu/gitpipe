@@ -18,7 +18,7 @@
                 ${flash.message}
             </div>
         </g:if>
-        <g:form controller="account">
+        <g:form mapping="account">
             <fieldset>
                 <div class="control-group ${hasErrors(bean: user, field: 'name', 'error')}">
                     <label for="name">Name</label>

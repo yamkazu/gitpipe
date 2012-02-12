@@ -436,13 +436,18 @@ read-more
 /**
 public key
 **/
-.accordion-toggle [class^="icon-"] {
-    margin-right: 3px;
-}
-
 .accordion-heading {
     padding: 10px 0;
 }
+
+.accordion-heading [class^="icon-"] {
+    margin-right: 5px;
+}
+
+.accordion-heading .icon-remove {
+    margin-top: 3px;
+}
+
 .accordion-heading .accordion-toggle {
     font-weight: bold;
     display: inline;
@@ -454,3 +459,12 @@ public key
     font-weight: bold;
 }
 
+.ssh-edit {
+    width: 410px;
+    margin-left: -220px;
+}
+
+#sshform-toggle, #sshform-cancel {
+    color: #4183C4;
+    font-weight: bold;
+}
