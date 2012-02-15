@@ -1,7 +1,6 @@
 package org.gitpipe
 
 import org.eclipse.jgit.lib.Constants
-
 import org.gitpipe.git.GpRepository
 
 class Project {
@@ -23,12 +22,12 @@ class Project {
         new GpRepository(directory())
     }
 
-    private File directory() {
-        new File(repositoryUserDir(), repositoryName())
-    }
-
     String repositoryName() {
         name + Constants.DOT_GIT;
+    }
+
+    private File directory() {
+        new File(repositoryUserDir(), repositoryName())
     }
 
     private File repositoryBaseDir() {

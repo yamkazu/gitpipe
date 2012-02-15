@@ -1,21 +1,24 @@
+import grails.converters.JSON
 import grails.plugins.springsecurity.Secured
-import org.gitpipe.User
 import grails.validation.Validateable
+import org.gitpipe.PublicKey
+import org.springframework.http.HttpStatus
+import org.springframework.validation.FieldError
 
 @Secured(['ROLE_USER'])
-class AccountController {
+class AccountController extends AbstractController {
+
+    static defaultAction = "showAccount"
+
+    def beforeInterceptor = {
+        bindUser(springSecurityService.principal.username)
+    }
 
     def springSecurityService
+    def publicKeyService
 
     def showAccount() {
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        render view: 'showAccount', model: [user: user]
+        [user: user]
     }
 
     def updateAccount(AccountUpdateCommand command) {
@@ -24,23 +27,14 @@ class AccountController {
             return
         }
 
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        user.name = command.name
-        user.email = command.email
-        user.location = command.location
+        bindData(user, command)
         user.save()
 
         flash.message = message(code: "account.update.successful")
-        redirect controller: 'account'
+        redirect(mapping: 'account')
     }
 
-    def showAdmin = {
+    def showAdmin() {
     }
 
     def updatePassword(PasswordUpdateCommand command) {
@@ -49,21 +43,110 @@ class AccountController {
             return
         }
 
-        def user = User.findByUsername springSecurityService.principal.username
-
-        if (!user) {
-            response.sendError(404)
-            return
-        }
-
-        user.password = command.password
+        bindData(user, command)
         user.save()
 
         flash.passwordMessage = message(code: "password.update.successful")
-
         redirect controller: 'account', action: 'admin'
     }
 
+    def showPublicKeys() {
+        withFormat {
+            html {
+                [publicKeys: user.publicKeys]
+            }
+            json {
+                render(contentType: "text/json") {
+                    array {
+                        for (PublicKey pk in user.publicKeys) {
+                            k = {
+                                id = pk.id
+                                title = pk.title
+                                key = pk.key
+                                url = createLink(mapping: 'account_ssh', params: [id: pk.id])
+                            }
+                        }
+                    }
+                }
+//                render user.publicKeys as JSON
+            }
+        }
+    }
+
+    def addPublicKey() {
+        def key = new PublicKey(params)
+        key.user = user
+
+        if (!key.save()) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+            render(contentType: "text/json") {
+                args = array {
+                    for (FieldError f in key.errors.fieldErrors) {
+                        e = {
+                            name = f.field
+                            errorMessage = fieldError(bean: key, field: f.field)
+                        }
+                    }
+
+                }
+            }
+            return
+        }
+
+        publicKeyService.writeAuthorizedKeys()
+        flash.sshEventMessage = 'ssh add successful'
+        render ""
+    }
+
+    def updatePublicKey(Long id) {
+        // call update
+        def targetKey = PublicKey.findById(id)
+        // TODO handle not found
+        
+        if (user != targetKey.user) {
+            // security handle
+            throw new RuntimeException('illegal access')
+        }
+        
+        bindData(targetKey, params)
+        
+        if (!targetKey.save()) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+            render(contentType: "text/json") {
+                array {
+                    for (FieldError f in targetKey.errors.fieldErrors) {
+                        e = {
+                            name = f.field
+                            errorMessage = fieldError(bean: targetKey, field: f.field)
+                        }
+                    }
+
+                }
+            }
+            return
+        }
+
+        publicKeyService.writeAuthorizedKeys()
+        flash.sshEventMessage = 'ssh update successful'
+        render ""
+    }
+
+    def deletePublicKey(Long id) {
+        // call update
+        def targetKey = PublicKey.findById(id)
+        // TODO handle not found
+
+        if (user != targetKey.user) {
+            // security handle
+            throw new RuntimeException('illegal access')
+        }
+
+        targetKey.delete()
+
+        publicKeyService.writeAuthorizedKeys()
+        flash.sshEventMessage = 'ssh delete successful'
+        render ""
+    }
 }
 
 @Validateable
