@@ -1,26 +1,73 @@
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.lib.RepositoryCache.FileKey
+import org.eclipse.jgit.util.FS
+import org.eclipse.jgit.transport.ReceivePack
+import org.eclipse.jgit.transport.UploadPack
+
 //
 // gitpipe.groovy
+//
+// handle ssh command.
+// original command ex:
+//   git-upload-pack 'test/test.git'
+//   git-receive-pack 'test/test.git'
 //
 
 @GrabResolver(name = 'jgit', root = 'http://download.eclipse.org/jgit/maven')
 @Grab(group = 'org.eclipse.jgit', module = 'org.eclipse.jgit.pgm', version = '1.2.0.201112221803-r')
-class Main extends org.eclipse.jgit.pgm.Main {}
+class Main {
 
-def parseCmd(String c) {
-    c.startsWith('git-') ? c.substring('git-'.length()) : c
+    static final String REPOSITORY_BASE = System.properties['user.home'] + "/.gitpipe/repositories"
+
+    def command
+    def user
+    def project
+
+    Repository repository
+
+    void execute(request) {
+        parse(request)
+        open()
+        handle()
+    }
+
+    void open() {
+        FileKey key = FileKey.lenient(new File("${REPOSITORY_BASE}/${user}/${project}.git"), FS.DETECTED)
+        repository = key.open(true)
+    }
+
+    void handle() {
+        if (isUploadPack()) {
+            handleUploadPack()
+        } else /* if (isReceivePack()) */ {
+            handleReceivePack()
+        }
+    }
+
+    void handleUploadPack() {
+        new UploadPack(repository).upload(System.in, System.out, System.err)
+    }
+
+    void handleReceivePack() {
+        new ReceivePack(repository).receive(System.in, System.out, System.err)
+    }
+
+    void parse(String request) {
+        def matcher = (request =~ /^(git-upload-pack|git-receive-pack) '(.+?)\/(.+?)(\.git)?'/)
+        if (!matcher.matches()) throw new IllegalArgumentException("illegal request: ${request}")
+        (request, command, user, project) = matcher[0]
+    }
+
+    boolean isUploadPack() {
+        command == 'git-upload-pack'
+    }
+
+    boolean isReceivePack() {
+        command == 'git-receive-pack'
+    }
+
 }
 
-def parseRepo(String r) {
-    def repo = r.replaceAll('\'', '')
-    if (repo.startsWith('/')) repo = repo.substring('/'.length())
-    if (repo.endsWith(".git")) repo = repo.substring(0, repo.size() - ".git".size())
-    repo.split('/')
-}
+new Main().execute(System.env['SSH_ORIGINAL_COMMAND'])
 
-def (cmd, repo) = System.env['SSH_ORIGINAL_COMMAND'].split(' ')
-cmd = parseCmd(cmd)
-def (owner, reponame) = parseRepo(repo)
-username = args[0]
-
-new Main().run([cmd, System.properties['user.home'] + "/.gitpipe/repositories/" + owner + "/" + reponame + ".git"] as String[])
 
