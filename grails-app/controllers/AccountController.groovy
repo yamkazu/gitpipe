@@ -15,6 +15,7 @@ class AccountController extends AbstractController {
     }
 
     def springSecurityService
+    def publicKeyService
 
     def showAccount() {
         [user: user]
@@ -92,6 +93,7 @@ class AccountController extends AbstractController {
             return
         }
 
+        publicKeyService.writeAuthorizedKeys()
         flash.sshEventMessage = 'ssh add successful'
         render ""
     }
@@ -124,6 +126,7 @@ class AccountController extends AbstractController {
             return
         }
 
+        publicKeyService.writeAuthorizedKeys()
         flash.sshEventMessage = 'ssh update successful'
         render ""
     }
@@ -140,6 +143,7 @@ class AccountController extends AbstractController {
 
         targetKey.delete()
 
+        publicKeyService.writeAuthorizedKeys()
         flash.sshEventMessage = 'ssh delete successful'
         render ""
     }

@@ -9,7 +9,7 @@ class PublicKey {
 
     static constraints = {
         title(blank: false)
-        key(blank: false)
+        key(blank: false, size: 1..1000)
     }
 
 }
