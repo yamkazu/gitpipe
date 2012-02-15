@@ -9,7 +9,7 @@ class PublicKey {
 
     static constraints = {
         title(blank: false)
-        key(blank: false, size: 1..1000)
+        key(blank: false, size: 1..1000, matches: "[a-zA-Z0-9\\-\\+/= @\\.]+")
     }
 
 }

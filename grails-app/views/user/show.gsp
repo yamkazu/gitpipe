@@ -14,7 +14,7 @@
     <div class="span3 acctions">
         <g:if test="${sec.username() == user.username}">
             <span class="label">This is you!</span>
-            <g:link controller="account" class="btn small">Edit Profile</g:link>
+            <g:link mapping="account" class="btn small">Edit Profile</g:link>
         </g:if>
     </div>
 </div>
