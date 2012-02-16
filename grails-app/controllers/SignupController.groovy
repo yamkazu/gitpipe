@@ -17,12 +17,9 @@ class SignupController {
 
         def user = new User(params)
         user.createDate = new Date()
-        user.enabled
+        user.enabled = true
 
         if (!user.save()){
-            user.errors.allErrors.each {
-                println it
-            }
             render view: 'form', model: [user: user]
             return
         }
