@@ -57,7 +57,6 @@ class BootStrap {
         def testUser = new User(username: 'test', enabled: true, password: 'test', email: 'test@example.com', createDate: new Date())
         
         testUser.name = 'Test User'
-        testUser.company = 'Test Company'
         testUser.location = 'Tokyo, Japan'
         testUser.save(flush: true)
         UserRole.create testUser, userRole, true

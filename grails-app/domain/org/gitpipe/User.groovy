@@ -10,7 +10,6 @@ class User {
     String email
     Date createDate
 
-    String company
     String location
     
     boolean enabled
@@ -24,7 +23,6 @@ class User {
     static constraints = {
         username unique: true
         name nullable: true
-        company nullable: true
         location nullable: true
     }
 
