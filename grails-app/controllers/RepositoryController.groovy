@@ -159,8 +159,8 @@ class RepositoryController extends AbstractController {
                                         name = commit.author.name
                                         def u = User.findByEmail(commit.author.email)
                                         if (u) {
-                                            username = user.username
-                                            url = createUserLink(user)
+                                            username = u.username
+                                            url = createUserLink(u)
                                         }
                                     }
                                 }
@@ -252,8 +252,8 @@ class RepositoryController extends AbstractController {
                                         name = entry.commit.author.name
                                         def u = User.findByEmail(entry.commit.author.email)
                                         if (u) {
-                                            username = user.username
-                                            url = createUserLink(user)
+                                            username = u.username
+                                            url = createUserLink(u)
                                         }
                                     }
                                 }
