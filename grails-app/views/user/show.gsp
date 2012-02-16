@@ -25,19 +25,15 @@
     <div class="span5 first vcard">
         <dl>
             <dt>Name</dt>
-            <dd>${user.name}</dd>
+            <dd>${user.name ?: "&nbsp;"}</dd>
         </dl>
         <dl>
             <dt>EMail</dt>
             <dd>${user.email}</dd>
         </dl>
         <dl>
-            <dt>Company</dt>
-            <dd>${user.company}</dd>
-        </dl>
-        <dl>
             <dt>Location</dt>
-            <dd>${user.location}</dd>
+            <dd>${user.location ?: "&nbsp;"}</dd>
         </dl>
         <dl>
             <dt>Member Since</dt>
