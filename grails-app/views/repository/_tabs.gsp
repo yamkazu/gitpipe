@@ -1,3 +1,12 @@
+<div class="input-prepend">
+    <span class="add-on">SSH</span>
+    <input id="prependedInput" class="span5" type="text" size="16" value="${"${System.properties['user.name']}@${request.serverName}:${user.username}/${project.repositoryName()}"}">
+    <p class="url-description">
+        <span class="bold">Read+Write</span>
+        access
+    </p>
+</div>
+
 <div class="subnav-bar">
     <ul class="nav nav-tabs">
         <li><span class="label label-info current">${ref}</span></li>

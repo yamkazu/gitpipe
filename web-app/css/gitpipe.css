@@ -468,3 +468,18 @@ public key
     color: #4183C4;
     font-weight: bold;
 }
+
+/**
+urlbox
+**/
+.url-description {
+    display: inline;
+    color: #666666;
+    font-size: 12px;
+    line-height: 24px;
+    margin-left: 5px;
+}
+.url-description span {
+    font-weight: bold;
+}
+

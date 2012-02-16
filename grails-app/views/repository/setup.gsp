@@ -26,7 +26,7 @@ git init
 touch README
 git add README
 git commit -m 'first commit'
-git remote add origin git@${request.serverName}:${user.username}/${project.repositoryName()}
+git remote add origin ${System.properties['user.name']}@${request.serverName}:${user.username}/${project.repositoryName()}
 git push -u origin master
 </pre>
 
@@ -35,7 +35,7 @@ git push -u origin master
 
 <pre>
 cd existing_git_repo
-git remote add origin git@${request.serverName}:${user.username}/${project.repositoryName()}
+git remote add origin ${System.properties['user.name']}@${request.serverName}:${user.username}/${project.repositoryName()}
 git push -u origin master
 </pre>
 
