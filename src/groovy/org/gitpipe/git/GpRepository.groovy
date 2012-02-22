@@ -23,6 +23,14 @@ class GpRepository {
         repository = RepositoryCache.open(RepositoryCache.FileKey.exact(directory, FS.DETECTED), false)
     }
 
+    protected getRepository() {
+        repository
+    }
+
+    File getDirectory() {
+        repository.directory
+    }
+
     void create(boolean bare = true) {
         if (!(repository?.directory.exists())) {
             repository.create(bare)
@@ -220,7 +228,6 @@ class GpRepository {
                 RevCommit parentCommit = revWalk.parseCommit(newCommit.getParent(0).getId())
                 oldTreeParser.reset(reader, parentCommit.tree);
                 diff.oldCommit = new GpCommit(parentCommit, false)
-
             }
 
             GpDiffFormatter formatter = new GpDiffFormatter(new ByteArrayOutputStream())
@@ -268,15 +275,15 @@ class GpRepository {
     }
 
     private void release(BlameGenerator generator) {
-        if (generator) { generator.release() }
+        if (generator) generator.release()
     }
 
     private void release(TreeWalk treeWalk) {
-        if (treeWalk) { treeWalk.release() }
+        if (treeWalk) treeWalk.release()
     }
 
     private void release(RevWalk revWalk) {
-        if (revWalk) { revWalk.release() }
+        if (revWalk) revWalk.release()
     }
 
 }
