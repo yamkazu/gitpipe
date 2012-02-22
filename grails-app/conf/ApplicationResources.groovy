@@ -18,7 +18,8 @@ modules = {
 
     gitpipe_commitsviewer {
         dependsOn 'gitpipe'
-        resource url: 'js/commits.js'
+//        resource url: 'js/commits.js'
+        resource url: 'cs/commits.coffee'
     }
 
     gitpipe_commitviewer {
