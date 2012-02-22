@@ -8,7 +8,7 @@ import org.eclipse.jgit.treewalk.TreeWalk
 
 class GpRaw {
 
-    Long size
+    BigDecimal size
     String mode
     byte[] file // TODO Big File 対応
 
