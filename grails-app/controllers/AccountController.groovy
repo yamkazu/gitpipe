@@ -167,7 +167,7 @@ class PasswordUpdateCommand {
     String passwordConfirmation
     static constraints = {
         password blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_!?]+", validator: { password, user ->
-            password == user.passwordConfirmation ?: ['notmutch']
+            password == user.passwordConfirmation ?: ['notmatch']
         }
     }
 }

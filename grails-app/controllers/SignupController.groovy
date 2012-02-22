@@ -45,7 +45,7 @@ class SignupCommand {
     static constraints = {
         username blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_]+"
         password blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_!?]+", validator: { password, user ->
-            password == user.passwordConfirmation ?: ['notmutch']
+            password == user.passwordConfirmation ?: ['notmatch']
         }
         email blank: false, email: true
     }

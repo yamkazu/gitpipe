@@ -73,7 +73,7 @@ class SignupControllerTest {
         command.password = 'aaa'
         command.passwordConfirmation = 'bbb'
         assert !command.validate()
-        assert command.errors['password'].code == 'notmutch'
+        assert command.errors['password'].code == 'notmatch'
     }
 
     void testCreate_domain_unique_error() {
