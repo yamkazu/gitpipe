@@ -2,7 +2,7 @@ import com.sun.org.apache.bcel.internal.generic.PUTFIELD
 
 class UrlMappings {
 
-	static mappings = {
+    static mappings = {
         // sing up
         "/signup/created"(controller: "signup", action: "created")
         "/signup"(controller: "signup") {
@@ -45,7 +45,8 @@ class UrlMappings {
         name user: "/$username"(controller: "user", action: "show")
 
         // other
-		name dashboard: "/"(view: "index")
-		"500"(view:'/error')
-	}
+        name dashboard: "/"(view: "index")
+        "500"(view: '/error')
+    }
+
 }
