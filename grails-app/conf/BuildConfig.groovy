@@ -40,6 +40,7 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.16'
         compile 'org.eclipse.jgit:org.eclipse.jgit:1.2.0.201112221803-r'
+        test 'org.eclipse.jgit:org.eclipse.jgit.junit:1.2.0.201112221803-r'
     }
 
     plugins {
