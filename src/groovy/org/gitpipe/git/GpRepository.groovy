@@ -1,6 +1,7 @@
 package org.gitpipe.git
 
 import org.apache.commons.lang.StringUtils
+import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.blame.BlameGenerator
 import org.eclipse.jgit.diff.DiffEntry
 import org.eclipse.jgit.diff.RawTextComparator
@@ -39,6 +40,11 @@ class GpRepository {
 
     Map<String, Ref> getBranches() {
         repository.refDatabase.getRefs(Constants.R_HEADS)
+    }
+
+    void cloneRepository(File cloneTo, boolean bare = true) {
+        assert cloneTo && !cloneTo.exists()
+        Git.cloneRepository().setDirectory(cloneTo).setBare(bare).setURI(repository.directory.canonicalPath).call()
     }
 
     String getDefaultBranch() {
