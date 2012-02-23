@@ -279,6 +279,7 @@ class GpRepository {
         }
         return false
     }
+
     boolean hasRemote(String name) {
         RemoteConfig.getAllRemoteConfigs(repository.config).find { it.name == name }
     }
@@ -295,6 +296,9 @@ class GpRepository {
         config.save()
     }
 
+    void fetch(String remote) {
+        Git.wrap(repository).fetch().setRemote(remote).call()
+    }
 
     private void release(BlameGenerator generator) {
         if (generator) generator.release()
@@ -309,4 +313,3 @@ class GpRepository {
     }
 
 }
-
