@@ -15,6 +15,8 @@ import org.eclipse.jgit.treewalk.filter.PathFilterGroup
 import org.eclipse.jgit.treewalk.filter.TreeFilter
 import org.eclipse.jgit.util.FS
 import org.eclipse.jgit.lib.*
+import org.eclipse.jgit.transport.RemoteConfig
+import org.eclipse.jgit.transport.URIish
 
 class GpRepository {
 
@@ -277,6 +279,22 @@ class GpRepository {
         }
         return false
     }
+    boolean hasRemote(String name) {
+        RemoteConfig.getAllRemoteConfigs(repository.config).find { it.name == name }
+    }
+
+    void addRemote(String name, File directory) {
+        addRemote(name, directory.toURL())
+    }
+
+    void addRemote(String name, URL url) {
+        def config = repository.config
+        RemoteConfig remoteConfig = new RemoteConfig(config, name)
+        remoteConfig.addURI(new URIish(url))
+        remoteConfig.update(config)
+        config.save()
+    }
+
 
     private void release(BlameGenerator generator) {
         if (generator) generator.release()
