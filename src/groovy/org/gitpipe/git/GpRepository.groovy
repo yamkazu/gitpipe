@@ -60,9 +60,7 @@ class GpRepository {
         RevWalk revWalk = null
         try {
             revWalk = new RevWalk(repository)
-            return branches.max { name, Ref ref ->
-                revWalk.parseCommit(ref.objectId).commitTime
-            }.key
+            return branches.max { revWalk.parseCommit(it.value.objectId).commitTime }.key
         } finally {
             revWalk.release()
         }
