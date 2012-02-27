@@ -9,14 +9,19 @@ class Project {
 
     String name
     String description
+    
+    Long projectId
+    Long forkProjectId
 
     static belongsTo = [user: User]
 
     static constraints = {
         name(blank: false, size: 3..20, matches: "[a-zA-Z0-9\\-_]+", unique: ['user', 'name'])
+        projectId(nullable: true)
+        forkProjectId(nullable: true)
     }
 
-    static transients = ['repository']
+    static transients = ['repository', 'fork']
 
     GpRepository getRepository() {
         new GpRepository(directory())
@@ -24,6 +29,17 @@ class Project {
 
     String repositoryName() {
         name + Constants.DOT_GIT;
+    }
+    
+    Project fork(User user) {
+        def project = new Project()
+        project.name = this.name
+        project.description = this.description
+        project.projectId = this.projectId ?: this.id
+        project.forkProjectId = this.id
+        project.user = user
+        repository.cloneRepository(project.directory())
+        project.save()
     }
 
     private File directory() {

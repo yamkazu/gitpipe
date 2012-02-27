@@ -36,6 +36,7 @@ class UrlMappings {
         name repository_commits: "/$username/$project/commits/$ref/$path**?"(controller: "repository", action: "commits")
 
         // project
+        name project_fork: "/$username/$project/fork"(controller: "project", action: "fork")
         name project: "/$username/$project"(controller: "project", action: "show")
         "/project"(controller: "project") {
             action = [GET: "form", POST: "create"]

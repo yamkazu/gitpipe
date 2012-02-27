@@ -31,6 +31,16 @@ class ProjectController extends AbstractController {
         redirect(mapping: 'project', params: [username: user.username, project: project.name])
     }
 
+    def fork() {
+        bindUser()
+        bindProject()
+
+        def forkMe = User.findByUsername(springSecurityService.principal.username)
+        project.fork(forkMe)
+
+        redirect(mapping: 'project', params: [username: forkMe.username, project: project.name])
+    }
+
     def show() {
         bindUser()
         bindProject()

@@ -70,6 +70,7 @@ code {
 /* page head */
 .pagehead h1 {
     font-size: 25px;
+    display: inline;
 }
 
 .pagehead h1 a {
