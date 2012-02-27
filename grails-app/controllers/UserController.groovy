@@ -5,7 +5,7 @@ class UserController extends AbstractController {
     }
 
     def show() {
-        model: [user: user, repositories: user.repositories]
+        [user: user, repositories: user.repositories]
     }
 
 }

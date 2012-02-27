@@ -18,8 +18,7 @@ class User {
     boolean passwordExpired
 
 //  FIXME
-//  http://jira.grails.org/browse/GRAILS-7814
-//  のバグが治ったらcommand分離を辞める
+//  block bug is http://jira.grails.org/browse/GRAILS-7814
     static constraints = {
         username unique: true
         name nullable: true

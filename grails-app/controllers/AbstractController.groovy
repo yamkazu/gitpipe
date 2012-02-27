@@ -1,8 +1,5 @@
 import org.gitpipe.Project
 import org.gitpipe.User
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException
-import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.context.request.RequestContextHolder
 
 abstract class AbstractController {
 
@@ -23,11 +20,11 @@ abstract class AbstractController {
         }
         project = Project.findByUserAndName(user, params.project)
         if (!project) {
-            throw new NoSuchUserException()
+            throw new NoSuchProjectException()
         }
     }
 
 }
 
-class NoSuchUserException extends Exception {
-}
+class NoSuchUserException extends Exception {}
+class NoSuchProjectException extends Exception {}

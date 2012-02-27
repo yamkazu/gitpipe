@@ -2,6 +2,7 @@ import grails.plugins.springsecurity.Secured
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.gitpipe.Project
+import org.gitpipe.User
 
 class ProjectController extends AbstractController {
 

@@ -37,9 +37,7 @@ class BootStrap {
     def initAuthorizedKeys() {
         def created = new File(grailsApplication.config.gitpipe.authorized_keys.createdfile)
         if (!created.exists()) {
-            println System.getProperty("user.home")
             def original = new File(System.getProperty("user.home") + "/.ssh/authorized_keys")
-            println original.exists()
             if (original.exists()) {
                 def backup = new File(grailsApplication.config.gitpipe.config.dir + "/authorized_keys.org")
                 backup << original.bytes
