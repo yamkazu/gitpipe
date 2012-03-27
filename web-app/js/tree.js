@@ -29,7 +29,7 @@
                     that.handleEvent(state);
                 });
             }
-            else {
+            else if (that.eventType === 'back') {
                 that.hideContentAsBack(function () {
                     that.handleEvent(state);
                 });
@@ -145,7 +145,7 @@
 
             var cache = that.target.data(pushUrl);
             if (cache) {
-                that.renderBlob(cache);
+                that.renderBlame(cache);
                 return;
             }
 
